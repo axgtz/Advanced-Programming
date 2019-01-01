@@ -8,8 +8,8 @@
 
 // Definition data type
 typedef struct info_structure{
-    int size;
-    int * data;
+    int size;       // 4 bytes
+    int * data;     // 8 bytes
 } info_t;
 
 // Function declarations
@@ -33,14 +33,30 @@ int main() {
 }
 
 info_t * initInfo(int size){
+    info_t * info = NULL;
 
+    // Get memory for the structure
+    info = malloc(sizeof(info_t));
+
+    // Get memory for the internal array
+    info->data = malloc(size * sizeof(int));
+
+    // Store the size
+    info->size = size;
+
+    return info;
 }
 
 void fillRandom(info_t * info){
-
+    for (int i = 0; i < info->size; ++i) {
+        // Integer in the range of 1 - 100
+        info->data[i] = rand() % 100 + 1;
+    }
 }
 
 void printInfo(info_t * info){
-
+    printf("Structure of %d ints\n", info->size);
+    for (int i = 0; i < info->size; ++i) {
+        printf("array[%d] = %d\n", i ,info->data[i]);
+    }
 }
-
