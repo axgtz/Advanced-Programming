@@ -4,35 +4,30 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define ARRAY_SIZE 30
+#define ARRAY_SIZE 30       // Assign constant of array size
 
-//TODO: Ask Gil to do +10 points in the assignments like Lulu
 int main() {
     int arrayRandNum[ARRAY_SIZE];
     int i , userNum;
-    FILE *file_ptr; //TODO: Ask Gil if we can ask for the number first then while calculating the random, do the minus in the same loop
+    FILE *file_ptr;
 
     for(i=0; i < ARRAY_SIZE; i++) { // Populate array with random numbers
         arrayRandNum[i] = rand() % 100 + 1; // Generate random number between 1 - 100  then add to array
-        printf("%d\n",arrayRandNum[i]);
+        //-printf("%d\n",arrayRandNum[i]);
     }
 
-    printf("Write an integer number between 1 - 100\n");    // TODO: how do i do validation?
-    scanf("%d", &userNum);
-
-    for(i=0; i < ARRAY_SIZE; i++) { // Iterate array again to subtract the user number minus the number in the array
-        arrayRandNum[i] = userNum - arrayRandNum[i];
-        printf("%d\n",arrayRandNum[i]);
-    }
+    printf("Write an integer number between 1 - 100\n");
+    scanf("%d", &userNum);          // Read number from user
 
     // Opening a file for writing
-    file_ptr = fopen("differences.txt", "w");
-    if(file_ptr){
-        for(i=0; i < ARRAY_SIZE; i++){
+    file_ptr = fopen("differences.txt", "w"); // open file stream, as w to write as new file
+    if(file_ptr){                                              // Validate that file exists
+        for(i=0; i < ARRAY_SIZE; i++){                          // Write on file a number per row
+            arrayRandNum[i] = userNum - arrayRandNum[i];    // Substract from the user number, the number in the array
             fprintf(file_ptr, "%d\n",arrayRandNum[i]);
         }
     }
-    fclose(file_ptr);
+    fclose(file_ptr); // Close file stream
 
     return 0;
 }
