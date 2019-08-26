@@ -1,7 +1,8 @@
 //  A01019608
 // Created by Roberto Alejandro Gutierrez Guillen on 2019-08-19.
 //
-#include <unistd.h>
+#include <stdio.h>
+#include <unistd.h> // Library to get flags, getopt
 
 int getopt (int argc, char *const *argv, const char *options);
 /*  i vertical - j horizontal - k dentro de la linea
@@ -26,6 +27,11 @@ void multiplyMatrix(string fileName1, string fileName2){
             for(int k = 0;k < 2;k++){
                 res[i][j]+= = arr[k][j]*arr2[i][k];
             }
+        }
+    }
+    for (int l = 0; l < 2; ++l) {
+        for (int i = 0; i < 2; ++i) {
+            fprintf();
         }
     }
     // Validate that matrix can be multiply

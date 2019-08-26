@@ -1,0 +1,9 @@
+#variables called sources
+SOURCES = test.c person.c
+MAIN = test
+
+#Rule named test
+#name of rule / what i need
+#   what im doing
+test: $(SOURCES)
+	gcc $(SOURCES) -o $(MAIN) -Wall -std=c99

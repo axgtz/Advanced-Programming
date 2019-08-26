@@ -2,7 +2,7 @@
 
 ### Variables for this project ###
 # The files that must be compiled, with a .o extension
-OBJECTS = person.o test.o
+OBJECTS = person.o
 # The header files
 DEPENDS = person.h
 # The executable program to be created
@@ -21,21 +21,18 @@ LDLIBS = -lm
 # Default rule
 all: $(MAIN)
 
-# Rule to make the executable.      $^ = all of the requirements
+# Rule to make the executable
 $(MAIN): $(OBJECTS)
 	$(CC) $^ -o $@ $(LDFLAGS) $(LDLIBS)
 
-# Rule to make the object files, this one is implicit. 		#< =  the first requirement
+# Rule to make the object files
 %.o: %.c $(DEPENDS)
 	$(CC) $< -c -o $@ $(CFLAGS)
-#CFlags at the end was specified, cause by defaults it puts it next to CC and some compilers might not work
 
 clean:
 	rm -rf *.o $(MAIN)
 
-#clean is a requirement of zip
 zip: clean
 	zip -r $(MAIN).zip *
-
-# Reserves the words. tells make that they are not files
+	
 .PHONY: clean all zip
