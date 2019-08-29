@@ -1,6 +1,8 @@
 //  A01019608
-// Created by Roberto Alejandro Gutierrez Guillen on 2019-08-19.
+// Created by Roberto Alejandro Gutierrez Guillen on 2019-08-28.
 //
+
+
 #include <stdio.h>
 #include <unistd.h> // Library to get flags, getopt
 
@@ -10,6 +12,7 @@ int getopt (int argc, char *const *argv, const char *options);
  * D E F  *   M N O     =   (D*J)+(E*M)+(F*P)  (D*K)+(E*N)+(F*Q)  (D*L)+(E*O)+(F*R)
  * G H I      P Q R         (G*J)+(H*M)+(I*P)  (G*K)+(H*N)+(I*Q)  (G*L)+(H*O)+(I*R)
  */
+
 void multiplyMatrix(string fileName1, string fileName2){
     // Read Text file 1
     FILE *file;
@@ -35,8 +38,8 @@ void multiplyMatrix(string fileName1, string fileName2){
         }
     }
     // Validate that matrix can be multiply
-        // Num col 1st matrix = num rows 2nd matrix
-        // Result = num of rows 1st matrix and num col 2nd matrix
+    // Num col 1st matrix = num rows 2nd matrix
+    // Result = num of rows 1st matrix and num col 2nd matrix
 
 
     // Output result into text file
@@ -47,11 +50,3 @@ int main(){
     return 0;
 }
 
-
- 7 -0
- 1 -1
- 3 -2
- 2 -3
- 4 - 4
- 5 -5
- 6 -7
