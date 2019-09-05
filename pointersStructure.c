@@ -28,6 +28,8 @@ int main() {
     fillRandom(info);
     printInfo(info);
 
+    free(info->data);
+    free(info);
 
     return 0;
 }
