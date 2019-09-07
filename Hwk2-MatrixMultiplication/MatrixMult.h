@@ -36,4 +36,6 @@ void writeFile(const matrix * mx, char* nameFile);
 
 void printMatrix(const matrix * mx);
 
+matrix * matrixCreator(int rowsNum, int columnsNum);
+
 #endif //ADVANCED_PROGRAMMING_MATRIXMULT_H

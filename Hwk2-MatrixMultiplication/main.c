@@ -15,7 +15,7 @@ int main (int argc, char *argv[]) {
     argm * a = NULL;
     a = malloc(sizeof(struct arguments));
 
-   /* if (argc != 7){
+    if (argc != 7){
         printf("Needs exactly 7 arguments!");
     }else{
 // You need to call getopt several times for each flag
@@ -36,13 +36,13 @@ int main (int argc, char *argv[]) {
                 printf("Unknown option %c\n", option);
                 break;
         }
-    }*/
-    strcpy(a->nameMat1, argv[2]);
-    strcpy(a->nameMat2, argv[4]);
-    strcpy(a->nameRes, argv[6]);
+    }
+    //strcpy(a->nameMat1, argv[2]);
+    //strcpy(a->nameMat2, argv[4]);
+    //strcpy(a->nameRes, argv[6]);
 
         masterMultiply(a);
-    //}
+    }
 
     return 0 ;
 }

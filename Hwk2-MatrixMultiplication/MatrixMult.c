@@ -31,22 +31,21 @@ void  masterMultiply(struct arguments * arg){
 matrix* readFile(char* nameFile) {
     FILE* file_ptr = NULL; // Initialize pointer to file
     matrix * mx = NULL;            // Declare matrix struct
+    int rowsNum;
+    int columnsNum;
 
-    // Allocate memory just for the struct, the array inside is missing
-    mx = (matrix*)malloc(sizeof(matrix)); // Do cast to avoid errors in older version
     // Opening a file for reading
     file_ptr = fopen(nameFile, "r");
     if(file_ptr == NULL){
-        printf("  - - -- - ");
+        printf("Error when reading file");
     }
 
     // Saves the first numbers into the matrix, first the row then the column
 
-    fscanf(file_ptr, "%i", &mx->rowsNum);
-    fscanf(file_ptr, "%i", &mx->columnsNum);
+    fscanf(file_ptr, "%i", rowsNum);
+    fscanf(file_ptr, "%i",columnsNum);
 
-    // Allocate memory for the array, initialize array in 0. Cast to avoid errors
-    mx->arrayPointer = (float*) calloc(mx->rowsNum * mx->columnsNum, sizeof(float));
+    mx = matrixCreator(rowsNum, columnsNum);
 
     // Fill the matrix, cycle through the values in the file
     for(int i = 0; i < mx->rowsNum; i++){
@@ -63,11 +62,7 @@ matrix* readFile(char* nameFile) {
 
 matrix* multiplyM(const matrix * mx1, const matrix * mx2) {
     // Initialize the result matrix
-    matrix * resultMatrix = NULL;
-    // Allocate memory
-    resultMatrix = malloc(sizeof(matrix));
-    
-    resultMatrix->arrayPointer = (float*) calloc(mx1->rowsNum * mx2->columnsNum, sizeof(float));
+    matrix * resultMatrix = matrixCreator(mx1->rowsNum, mx2->columnsNum);
 
     // Do multiplication
     for (int i = 0; i < mx1->rowsNum; ++i) {
@@ -113,4 +108,16 @@ void printMatrix(const matrix * mx){
         printf("\n");
     }
     printf("\n");
+}
+
+matrix * matrixCreator(int rowsNum, int columnsNum){
+    // Initialize the result matrix
+    matrix * mx = NULL;
+    // Allocate memory
+    mx = malloc(sizeof(matrix));
+
+    // Allocate memory for the array, initialize array in 0. Cast to avoid errors
+    mx->arrayPointer = (float*) calloc(rowsNum * columnsNum, sizeof(float));
+
+    return mx;
 }
