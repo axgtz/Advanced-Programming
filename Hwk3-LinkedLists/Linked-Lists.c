@@ -46,7 +46,7 @@ void insertAtHead(int num,node * head){
     head = n;
 }
 void insertAtTail(int num){
-
+    node
 }
 
 void insertAtPosition(int num, int pos){

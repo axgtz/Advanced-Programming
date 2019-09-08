@@ -9,7 +9,7 @@
 
 int main (int argc, char *argv[]) {
     int option;
-    printf("MAXIMUM NAME FOR FILES IS 50 CHARACTERS\n");
+    printf("REMEMBER MAXIMUM NAME FOR FILES IS 50 CHARACTERS\n");
 
     // Initialize struct of arguments
     argm * a = NULL;
@@ -37,11 +37,8 @@ int main (int argc, char *argv[]) {
                 break;
         }
     }
-    //strcpy(a->nameMat1, argv[2]);
-    //strcpy(a->nameMat2, argv[4]);
-    //strcpy(a->nameRes, argv[6]);
-
         masterMultiply(a);
+        free(a);
     }
 
     return 0 ;
