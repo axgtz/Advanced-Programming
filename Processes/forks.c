@@ -6,25 +6,26 @@
 #include <unistd.h> // pid
 
 int main (int argc, char ** argv){
-    printf("Beginning of Program\n");
-
     int counter = 0;
 
-    pid_t  pid = fork();
+    printf("Program begin\n");
 
-    if (pid == 0){
+
+    pid_t newPid = fork();
+
+    if (newPid == 0){
         // Child process
         int i = 0;
-
-        for(; i< 50 ; i++){
+        printf("I am the parent (%d) and my child is (%d)\n",getpid(),newPid);
+        for(; i< 2; i++){
             printf("Child process: counter=%d\n", counter++);
         }
 
-    } else if (pid > 0){
+    } else if (newPid > 0){
         // Parent process
         int j = 0;
 
-        for(; j< 50 ; j++){
+        for(; j< 2 ; j++){
             printf("Parent process: counter=%d\n", counter++);
         }
 
@@ -33,6 +34,5 @@ int main (int argc, char ** argv){
         printf("fork() failed");
         return 1;
     }
-
     return 0;
 }
