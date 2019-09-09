@@ -8,9 +8,11 @@
 int factorial(int n);
 
 int main (int argc, char * argv[]){
-    printf("%d\n",factorial(atoi(argv[1])));
+    int result = 0;
+    result = factorial(atoi(argv[1]));
+    printf("RESULT: %d\n",result);
 
-    return 0;
+    return result;
 }
 
 int factorial(int n)

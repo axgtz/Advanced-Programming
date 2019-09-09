@@ -6,9 +6,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-int main(){
-    char * command = "./fact";
-    char * arguments[] = {"./fact", "5", (char *) NULL}; // The first argument should be command
+int main (int argc, char * argv[]){
+    char * command = "./factorial";
+    char * arguments[] = {"./factorial", argv[1], (char *) NULL}; // The first argument should be command
     pid_t new_pid;
     int status = 0;
 
@@ -18,7 +18,7 @@ int main(){
         printf("Parent (%d) is waiting for the child (%d)\n", getpid(), new_pid);
         wait(&status);
         printf("Now the parent can continue\n");
-        printf("Child finished with status: %d\n", status);
+        printf("Child finished with status: %d\n", WEXITSTATUS(status)); // WEXITSTATUS is to remove other info
 
     } else if (new_pid == 0){ // Child
         printf("Switching to commandls '%s'\n", command);
