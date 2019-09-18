@@ -22,8 +22,9 @@ int main () {
     int tam = 9;
     int tamEnc = 5;
     for(int i = 0; i < tam;i++){
-        fileName[i]+= (fileName[i] + encryptionKey[i%5]) %25;
-
+        int tot = ((fileName[i]-97) + (encryptionKey[i%tamEnc])-97) %26;
+        printf("%d ",tot);
+        fileName[i] = 97 + tot; // 97 is the
     }
     for (int j = 0; j < tam; ++j) {
         printf("%c ", fileName[j]);
