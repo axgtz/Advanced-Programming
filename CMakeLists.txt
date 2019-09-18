@@ -11,3 +11,4 @@ add_executable(MatrixMult Hwk2-MatrixMultiplication/MatrixMult.c Hwk2-MatrixMult
 add_executable(pointersStructure pointersStructure.c)
 add_executable(forks Processes/forks.c)
 add_executable(linked_list Hwk3-LinkedLists/linked_list.c  Hwk3-LinkedLists/test_list.c)
+add_executable(pipes Processes/pipes.c)
