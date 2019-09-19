@@ -19,15 +19,19 @@ int main () {
     strncpy(fileName, "attacknow", STR_SIZE);
     strncpy(encryptionKey, "lemon", STR_SIZE);
 
-    int tam = 9;
+    //int tam = 9;
+    size_t tam = strlen(fileName);
     int tamEnc = 5;
-    for(int i = 0; i < tam;i++){
-        int tot = ((fileName[i]-97) + (encryptionKey[i%tamEnc])-97) %26;
-        printf("%d ",tot);
-        fileName[i] = 97 + tot; // 97 is the
+    for(int i = 0; i < tam;i++){ //TODO Ask gil that if theres a non normal char, move to next encryption
+        if(fileName[i] > 96 && fileName[i] < 123){ // if its within the alphabet
+            int tot = ((fileName[i]-97) + (encryptionKey[i%tamEnc])-97) %26;
+            printf("%d ",tot);
+            fileName[i] = 97 + tot; // 97 is the ASCII number for 'a'
+        } else {// Non-alphabet character, keeps it the same
+        }
     }
     for (int j = 0; j < tam; ++j) {
-        printf("%c ", fileName[j]);
+        printf("%c", fileName[j]);
     }
     /*for (int i = 0; i < 26 ;i++){
         int a = i + 97;
