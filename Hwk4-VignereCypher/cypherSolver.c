@@ -1,46 +1,59 @@
 //  A01019608
 // Created by Roberto Alejandro Gutierrez Guillen on 2019-09-15.
 //
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define STR_SIZE 50
+#define STR_SIZE 100
 
 int main () {
-    // Ask Gil about variable declaration at the beginning or where you use it
-    FILE * file_ptr = NULL;
+    FILE * file_ptr_read = NULL; // Pointer to file being read
+    FILE * file_ptr_write = NULL;// Pointer to file being writen
+
     int option = 0;
-    char fileName[STR_SIZE];
-    char encryptionKey[STR_SIZE];
-    // (i+k) % 25;
-    // i = posicion actual (valor de pass a encriptar)  k = num de rot (valor de encoding key)
-    strncpy(fileName, "attacknow", STR_SIZE);
+    char fileName[STR_SIZE];                // Name of the file to read
+    char encryptionKey[STR_SIZE];          // Encryption key
+    char lineFileBuffer[STR_SIZE];        // Line from file
+
+    strncpy(fileName, "attack now", STR_SIZE);
+
     strncpy(encryptionKey, "lemon", STR_SIZE);
 
-    //int tam = 9;
-    size_t tam = strlen(fileName);
-    int tamEnc = 5;
-    for(int i = 0; i < tam;i++){ //TODO Ask gil that if theres a non normal char, move to next encryption
+    size_t tamFile = strlen(fileName); // Size of the stored data inside the buffer //TODO: aqui va el buffer
+    size_t tamEncKey = strlen(encryptionKey); // Size of the encryption key
+
+    // Encryption
+    for(int i = 0; i < tamFile;i++){
         if(fileName[i] > 96 && fileName[i] < 123){ // if its within the alphabet
-            int tot = ((fileName[i]-97) + (encryptionKey[i%tamEnc])-97) %26;
-            printf("%d ",tot);
-            fileName[i] = 97 + tot; // 97 is the ASCII number for 'a'
+            int tot = ((fileName[i]-97) + (encryptionKey[i%tamEncKey])-97) %26;
+            lineFileBuffer[i] = 97 + tot; // 97 is the ASCII number for 'a'
         } else {// Non-alphabet character, keeps it the same
+            lineFileBuffer[i] = fileName[i];
         }
     }
-    for (int j = 0; j < tam; ++j) {
-        printf("%c", fileName[j]);
+    for (int j = 0; j < tamFile; ++j) { // Print result encoded
+        printf("%c", lineFileBuffer[j]);
     }
-    /*for (int i = 0; i < 26 ;i++){
-        int a = i + 97;
-        char c = a;
-        printf("%c", c);
-    }*/
+    // Opening a file for writing
+    // Create new name for the result file
+    char *resultFileName = malloc(tamFile + 12 + 1);
+    strcpy(resultFileName, "encoded_");
+    strcat(resultFileName, fileName);
+    strcat(resultFileName, ".txt");
 
+    // Open file for writing
+    file_ptr_read = fopen(resultFileName, "w");
 
+    if (!file_ptr_read){// Check that file is valid
+        perror("Error! creating the file");
+        // Program exits if the file pointer returns NULL.
+        exit(EXIT_FAILURE);
+    }
+    fprintf(file_ptr_read, "%s",lineFileBuffer); // Write all the lineFileBuffer into the file
+    fclose(file_ptr_read);
 
+    free(resultFileName); // Free memory of string
     /*
     // User choose to decode or encode a message
     printf("VIGNERE CYPHER\n");
@@ -59,7 +72,7 @@ int main () {
         // Non special chars need to be evaluated with encryption key
 
     }else if(option == 2){ // Decode
-        printf("Please write the encryption key MAX LENGTH = 50\n");
+        printf("Please write the encryption key MAX LENGTH = 99\n");
         fgets(encryptionKey, STR_SIZE, stdin);
         encryptionKey[strlen(encryptionKey)-1] = '\0';      // Remove the newline character
         printf("%s", encryptionKey);
@@ -82,3 +95,16 @@ You can use any of the Inter Process Communication (IPC) methods seen so far
  (pipe, popen, fifo, passing arguments), as long as you have two way communication
  between the parent and the child processes.
  */
+/* for (int j = 0; j < tamFile; ++j) { // Print result encoded
+     printf("%c", lineFile[j]);
+ }*/
+
+
+/* Print the ASCII characters
+ * for (int i = 0; i < 26 ;i++){
+    int a = i + 97;
+    char c = a;
+    printf("%c", c);
+}*/
+
+

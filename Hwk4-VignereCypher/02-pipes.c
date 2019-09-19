@@ -39,8 +39,8 @@ int main()
     {
         preparePipes(child_to_parent, parent_to_child);
         printf("I am the parent (%d) and my child is (%d)\n", getpid(), new_pid);
-        sprintf(buffer, "Hello child\n");
-        write(parent_to_child[1], buffer, strlen(buffer));
+        sprintf(buffer, "Hello child\n"); // Overwrites buffer
+        write(parent_to_child[1], buffer, strlen(buffer)); // do a single write function
     }
     else if (new_pid == 0)
     {
