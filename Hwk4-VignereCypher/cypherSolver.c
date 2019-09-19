@@ -8,28 +8,45 @@
 #define STR_SIZE 100
 
 int main () {
-    FILE * file_ptr_read = NULL; // Pointer to file being read
-    FILE * file_ptr_write = NULL;// Pointer to file being writen
+    FILE * file_ptr_read = NULL;    // Pointer to file being read
+    FILE * file_ptr_write = NULL;   // Pointer to file being writen
 
     int option = 0;
     char fileName[STR_SIZE];                // Name of the file to read
     char encryptionKey[STR_SIZE];          // Encryption key
     char lineFileBuffer[STR_SIZE];        // Line from file
 
-    strncpy(fileName, "attack now", STR_SIZE);
-
+    // Used to test, should be used as input
+    strncpy(fileName, "example_encodings/aladdin.txt", STR_SIZE);
+    /*
+     *  char *resultFileName = malloc(tamFile + 12 + 1);
+    strcpy(resultFileName, "encoded_");
+    strcat(resultFileName, fileName);
+    strcat(resultFileName, ".txt");
+     * */
     strncpy(encryptionKey, "lemon", STR_SIZE);
 
-    size_t tamFile = strlen(fileName); // Size of the stored data inside the buffer //TODO: aqui va el buffer
+    file_ptr_read = fopen(fileName, "r");
+    printf("%s", fileName);
+    if (!file_ptr_read){// Check that file is valid
+        perror("Error! reading the file");
+        // Program exits if the file pointer returns NULL.
+        exit(EXIT_FAILURE);
+    }
+
+    size_t tamFile = strlen(lineFileBuffer); // Size of the stored data inside the buffer
     size_t tamEncKey = strlen(encryptionKey); // Size of the encryption key
+    fgets(lineFileBuffer, STR_SIZE, file_ptr_read);
+
+    fclose(file_ptr_read);
 
     // Encryption
     for(int i = 0; i < tamFile;i++){
-        if(fileName[i] > 96 && fileName[i] < 123){ // if its within the alphabet
-            int tot = ((fileName[i]-97) + (encryptionKey[i%tamEncKey])-97) %26;
+        if(lineFileBuffer[i] > 96 && lineFileBuffer[i] < 123){ // if its within the alphabet
+            int tot = ((lineFileBuffer[i]-97) + (encryptionKey[i%tamEncKey])-97) %26;
             lineFileBuffer[i] = 97 + tot; // 97 is the ASCII number for 'a'
         } else {// Non-alphabet character, keeps it the same
-            lineFileBuffer[i] = fileName[i];
+            lineFileBuffer[i] = lineFileBuffer[i];
         }
     }
     for (int j = 0; j < tamFile; ++j) { // Print result encoded
@@ -43,15 +60,15 @@ int main () {
     strcat(resultFileName, ".txt");
 
     // Open file for writing
-    file_ptr_read = fopen(resultFileName, "w");
+    file_ptr_write = fopen(resultFileName, "w");
 
-    if (!file_ptr_read){// Check that file is valid
+    if (!file_ptr_write){// Check that file is valid
         perror("Error! creating the file");
         // Program exits if the file pointer returns NULL.
         exit(EXIT_FAILURE);
     }
-    fprintf(file_ptr_read, "%s",lineFileBuffer); // Write all the lineFileBuffer into the file
-    fclose(file_ptr_read);
+    fprintf(file_ptr_write, "%s",lineFileBuffer); // Write all the lineFileBuffer into the file
+    fclose(file_ptr_write);
 
     free(resultFileName); // Free memory of string
     /*
