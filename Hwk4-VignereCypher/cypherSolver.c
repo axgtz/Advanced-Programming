@@ -39,8 +39,8 @@ int main(){
         // Get and send name of file
         printf("Please write the name of the file.\n");
         //fgets(fileName, STR_SIZE, stdin);          // Get the name of the file
-        strncpy(fileName, "encoded_aladdin.txt ", STR_SIZE); // todo
-
+        //strncpy(fileName, "encoded_aladdin.txt ", STR_SIZE); // todo
+        strncpy(fileName, "aladdin.txt ", STR_SIZE);
         fileName[strlen(fileName)-1] = '\0';      // Remove the newline character
         write(parent_to_child[1], fileName, strlen(fileName)); // do a single write function
         close(parent_to_child[1]); // Close writing of parent
@@ -75,7 +75,7 @@ int main(){
 
 
         // User choose to decode or encode a message
-        int option = 2; //todo
+        int option = 1; //todo
          printf("Do you want to encode or decode a message? Write 1 for encode or 2 for decode\n");
          //scanf("%d", &option);
          //fgetc(stdin);   // Remove the enter left from scanf
@@ -133,7 +133,7 @@ int main(){
                 // Encryption
                 for (int i = 0; i < sizeFile; i++) {
                     if (lineFileBuffer[i] > 96 && lineFileBuffer[i] < 123) { // if its within the alphabet
-                        int tot = ((lineFileBuffer[i] - 97) + (encryptionKey[i % sizeEncKey]) - 97) % 26;
+                        int tot = ((lineFileBuffer[i] - 97) + (encryptionKey[i % sizeEncKey] - 97)) % 26; // - 97 to remove the A
                         lineFileBuffer[i] = 97 + tot; // 97 is the ASCII number for 'a'
                     }
                 }
@@ -148,8 +148,8 @@ int main(){
 
                 // Encryption
                 for (int i = 0; i < sizeFile; i++) {
-                    if (lineFileBuffer[i] > 96 && lineFileBuffer[i] < 123) { // if its within the alphabet
-                        int tot = ((lineFileBuffer[i] - 97) + (encryptionKey[i % sizeEncKey]) - 97) % 26;
+                    if (lineFileBuffer[i] > 96 && lineFileBuffer[i] < 123) { // if its within the alphabet, if not it just copies
+                        int tot = ((lineFileBuffer[i] - 97) - (encryptionKey[i % sizeEncKey] - 97) + 26) % 26;
                         lineFileBuffer[i] = 97 + tot; // 97 is the ASCII number for 'a'
                     }
                 }
