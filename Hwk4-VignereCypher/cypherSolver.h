@@ -1,8 +1,9 @@
 /*
- * Roberto Alejandro Gutierrez Guillen
- 19 / 09 / 2019
-  pipe code from  Gilberto Echeverria
-  Hwk 4 - VignereCypher
+    Roberto Alejandro Gutierrez Guillen
+    19 / 09 / 2019
+    pipe code from  Gilberto Echeverria
+    Hwk 4 - VignereCypher
+    To use code just call startCypher from main and import this file
 */
 
 #include <stdio.h>
@@ -12,7 +13,7 @@
 
 #define STR_SIZE 100
 
-int main(){
+void startCypher() {
     pid_t new_pid;
     int status;                             // pipe status
     char fileName[STR_SIZE];                // Name of the file to read
@@ -38,9 +39,7 @@ int main(){
         printf("VIGNERE CYPHER\n");
         // Get and send name of file
         printf("Please write the name of the file.\n");
-        //fgets(fileName, STR_SIZE, stdin);          // Get the name of the file
-        //strncpy(fileName, "encoded_aladdin.txt ", STR_SIZE); // todo
-        strncpy(fileName, "aladdin.txt ", STR_SIZE);
+        fgets(fileName, STR_SIZE, stdin);          // Get the name of the file
         fileName[strlen(fileName)-1] = '\0';      // Remove the newline character
         write(parent_to_child[1], fileName, strlen(fileName)); // do a single write function
         close(parent_to_child[1]); // Close writing of parent
@@ -50,6 +49,7 @@ int main(){
         close(child_to_parent[1]); // Close writing of child
 
         read(child_to_parent[0], fileName, STR_SIZE); // Read answer from child
+        fileName[strlen(fileName)-3] = '\0'; // Something is adding 3 random characters for pipes
         printf("The name of the file with the resulting text is:  %s\n", fileName);
         close(child_to_parent[0]); // Close reading from child
 
@@ -58,7 +58,7 @@ int main(){
 
         // Read the name of the file from pipe of parent
         read(parent_to_child[0], fileName, STR_SIZE);
-        //printf("My parent sent: %s", fileName);
+        fileName[strlen(fileName)-3] = '\0'; // Something is adding 3 random characters
 
         // Close reading from both
         close(child_to_parent[0]);
@@ -66,24 +66,21 @@ int main(){
 
         // Encryption key read
         char encryptionKey[STR_SIZE];          // Encryption key
-        /*printf("Please write the encryption key MAX LENGTH = 99\n"); // todo
+        printf("Please write the encryption key MAX LENGTH = 99\n");
         fgets(encryptionKey, STR_SIZE, stdin);
         encryptionKey[strlen(encryptionKey)-1] = '\0';      // Remove the newline character
-        printf("%s", encryptionKey);
-        */
-        strncpy(encryptionKey, "prograavanzada", STR_SIZE);
-
 
         // User choose to decode or encode a message
-        int option = 1; //todo
-         printf("Do you want to encode or decode a message? Write 1 for encode or 2 for decode\n");
-         //scanf("%d", &option);
-         //fgetc(stdin);   // Remove the enter left from scanf
-         if (option != 1 && option != 2){
-             printf("Please write a valid option next time\n");
-             exit(1);
-         }
+        int option = 0;
+        printf("Do you want to encode or decode a message? Write 1 for encode or 2 for decode\n");
+        scanf("%d", &option);
+        fgetc(stdin);   // Remove the enter left from scanf
+        if (option != 1 && option != 2){
+            printf("Please write a valid option next time\n");
+            exit(1);
+        }
 
+        // Initialize pointers and buffer when needed
         FILE *file_ptr_read = NULL;    // Pointer to file being read
         FILE *file_ptr_write = NULL;   // Pointer to file being writen
         char lineFileBuffer[STR_SIZE];        // Line from file
@@ -161,7 +158,6 @@ int main(){
             exit(1);
         }
 
-
         //Close files
         fclose(file_ptr_read);
         fclose(file_ptr_write);
@@ -174,6 +170,4 @@ int main(){
     }else{
         printf("ERROR when doing the fork\n");
     }
-
-    return 0;
 }
