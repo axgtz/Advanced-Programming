@@ -2,10 +2,9 @@
 // Created by Roberto Alejandro Gutierrez Guillen on 2019-09-01.
 //
 
-#include "MatrixMult.h"
 #include <unistd.h> // getopt
 #include <string.h>
-
+#include "MatrixMult.h"
 
 int main (int argc, char *argv[]) {
     int option;

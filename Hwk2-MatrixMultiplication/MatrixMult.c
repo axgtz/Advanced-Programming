@@ -4,7 +4,7 @@
 
 #include "MatrixMult.h"
 
-void  masterMultiply(struct arguments * arg){
+void masterMultiply(struct arguments * arg){
     matrix * mx1 = NULL;
     matrix * mx2 = NULL;
     matrix * resMax = NULL;

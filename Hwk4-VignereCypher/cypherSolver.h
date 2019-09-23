@@ -53,6 +53,7 @@ void startCypher() {
         printf("The name of the file with the resulting text is:  %s\n", fileName);
         close(child_to_parent[0]); // Close reading from child
 
+
     }else if (new_pid == 0) {// Child process
         close(parent_to_child[1]); // close writing from parent
 
