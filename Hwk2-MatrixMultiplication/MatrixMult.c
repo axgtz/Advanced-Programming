@@ -68,7 +68,7 @@ matrix* multiplyM(const matrix * mx1, const matrix * mx2) {
     for (int i = 0; i < mx1->rowsNum; ++i) {
         for (int j = 0; j < mx2->columnsNum; ++j) {
             for (int k = 0; k < mx1->columnsNum; ++k) {
-                resultMatrix->arrayPointer[i * mx1->columnsNum + j] =mx1->arrayPointer[i * mx1->columnsNum + k] * mx2->arrayPointer[j * mx1->columnsNum + k];
+                resultMatrix->arrayPointer[i * mx1->columnsNum + j] += mx1->arrayPointer[i * mx1->columnsNum + k] * mx2->arrayPointer[k * mx1->columnsNum + j];
             }
         }
     }
