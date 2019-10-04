@@ -1,7 +1,7 @@
 /*
     Program for a simple chat client
     The server address and port are provided as arguments to the program
-// ./client localhost 8989
+
     Gilberto Echeverria
     gilecheverria@yahoo.com
     26/02/2017
@@ -45,7 +45,6 @@ void connectToServer(char * address, char * port)
 {
     struct addrinfo hints;
     struct addrinfo * server_info = NULL;
-    int connection_fd;
     int client_fd;
 
     // Prepare the information to determine the local address
@@ -96,25 +95,31 @@ void communicationLoop(int connection_fd)
     char buffer[BUFFER_SIZE];
     int chars_read;
 
-    while(1) {
-        // Send a reply
+    while(1)
+    {
+        // Send a request
         printf("Message: ");
         fgets(buffer, BUFFER_SIZE, stdin);
         // Remove the enter from the message
-        buffer[strlen(buffer) - 1] = '\0';
-        send(connection_fd, buffer, strlen(buffer) + 1, 0);
+        buffer[strlen(buffer)-1] = '\0';
+        send(connection_fd, buffer, strlen(buffer)+1, 0);
 
         // Clear the buffer
         bzero(buffer, BUFFER_SIZE);
         // Get an incomming message
         chars_read = recv(connection_fd, buffer, BUFFER_SIZE, 0);
         // Error when receiving data
-        if (chars_read == -1) {
+        if (chars_read == -1)
+        {
             perror("recv");
             close(connection_fd);
             return;
-        } else if (chars_read == 0) {
-            printf("Connection closed by client\n");
+        }
+        else if (chars_read == 0)
+        {
+            printf("Connection closed by server\n");
+            close(connection_fd);
+            return;
         }
 
         printf("The server sent me: '%s'\n", buffer);

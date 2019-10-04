@@ -70,7 +70,7 @@ void waitForConnections(int server_fd)
         client_address_size = sizeof client_address;
         // Get the file descriptor to talk with the client
         connection_fd = accept(server_fd, (struct sockaddr *) &client_address,
-                                &client_address_size);
+                               &client_address_size);
         if (connection_fd == -1)
         {
             perror("accept");

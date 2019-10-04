@@ -1,7 +1,7 @@
 /*
     Program for a simple chat server
     Can only connect with one client at a time
-//./server 8989
+
     Gilberto Echeverria
     gilecheverria@yahoo.com
     23/02/2017
@@ -26,7 +26,8 @@ void startServer(char * port);
 void waitForConnections(int server_fd);
 void communicationLoop(int connection_fd);
 
-int main(int argc, char * argv[]){
+int main(int argc, char * argv[])
+{
     printf("\n=== SERVER PROGRAM ===\n");
 
     if (argc != 2)
@@ -38,13 +39,15 @@ int main(int argc, char * argv[]){
 }
 
 // Show the user how to run this program
-void usage(char * program){
+void usage(char * program)
+{
     printf("Usage:\n%s {port_number}\n", program);
     exit(EXIT_FAILURE);
 }
 
 // Initialize the server to be ready for connections
-void startServer(char * port){
+void startServer(char * port)
+{
     struct addrinfo hints;
     struct addrinfo * server_info = NULL;
     int server_fd;
@@ -61,7 +64,8 @@ void startServer(char * port){
 
     ///// GETADDRINFO
     // Get the actual address of this computer
-    if (getaddrinfo(NULL, port, &hints, &server_info) == -1){
+    if (getaddrinfo(NULL, port, &hints, &server_info) == -1)
+    {
         perror("getaddrinfo");
         exit(EXIT_FAILURE);
     }
@@ -78,7 +82,12 @@ void startServer(char * port){
     
     // Allow using the same port immediately, even if the previous server did not close correctly
     int reuse = 1;
-    setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
+    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof reuse) == -1)
+    {
+        perror("setsockopt");
+        close(server_fd);
+        exit(EXIT_FAILURE);
+    }
 
     ///// BIND
     // Connect with the desired port
@@ -111,71 +120,84 @@ void startServer(char * port){
 }
 
 // Stand by for connections by the clients
-void waitForConnections(int server_fd){
+void waitForConnections(int server_fd)
+{
     struct sockaddr_in client_address;
     socklen_t client_address_size;
     char client_presentation[INET_ADDRSTRLEN];
     int connection_fd;
     pid_t new_pid;
 
-    while(1) {
+    while(1)
+    {
         ///// ACCEPT
         // Receive incomming connections
         // Get the size of the structure where the address of the client will be stored
         client_address_size = sizeof client_address;
         // Get the file descriptor to talk with the client
         connection_fd = accept(server_fd, (struct sockaddr *) &client_address,
-                               &client_address_size);
-        if (connection_fd == -1) {
+                                &client_address_size);
+        if (connection_fd == -1)
+        {
             perror("accept");
             close(connection_fd);
         }
 
         // Fork a child process to deal with the new client
-        mew_pid = fork();
-        if(new_pid >0){ // Parent
+        new_pid = fork();
+        if (new_pid > 0)    // Parent
+        {
             close(connection_fd);
-        }else if(new_pid == 0){ // Child
+        }
+        else if (new_pid == 0)      // Child
+        {
             close(server_fd);
+
             // Identify the client
             // Get the ip address from the structure filled by accept
             inet_ntop(client_address.sin_family, &client_address.sin_addr, client_presentation, INET_ADDRSTRLEN);
-            printf("Recieved connection from %s : %d\n", client_presentation, client_address.sin_port);
+            printf("Received a connection from %s : %d\n", client_presentation, client_address.sin_port);
 
             // Establish the communication
             communicationLoop(connection_fd);
+            close(connection_fd);
+            // Finish the child process
             exit(EXIT_SUCCESS);
         }
-
     }
 }
 
 // Do the actual receiving and sending of data
-void communicationLoop(int connection_fd) {
+void communicationLoop(int connection_fd)
+{
     char buffer[BUFFER_SIZE];
     int message_counter = 0;
     int chars_read;
 
-    while(1){
+    while(1)
+    {
         // Clear the buffer
         bzero(buffer, BUFFER_SIZE);
         // Get an incomming message
         chars_read = recv(connection_fd, buffer, BUFFER_SIZE, 0);
         // Error when receiving data
-        if (chars_read == -1) {
+        if (chars_read == -1)
+        {
             perror("recv");
             close(connection_fd);
             return;
-        } else if (chars_read == 0) {
+        }
+        else if (chars_read == 0)
+        {
             printf("Connection closed by client\n");
             close(connection_fd);
             return;
         }
-
+        
         printf("The client sent me: '%s'\n", buffer);
 
         // Send a reply
         sprintf(buffer, "Reply to message %d", ++message_counter);
-        send(connection_fd, buffer, strlen(buffer) + 1, 0);
+        send(connection_fd, buffer, strlen(buffer)+1, 0);
     }
 }

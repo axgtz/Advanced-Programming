@@ -1,0 +1,9 @@
+Function inside comm loop
+    Loop for client, server
+
+Client program asks the user how much money you have, then its sent to server
+* when you want to bet, the server needs to validate that you have that money
+
+As its 1 until the total of hand is more than 21
+
+El server responde BYE al usuario, te quedaste con este dinero
