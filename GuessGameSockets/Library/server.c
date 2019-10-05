@@ -120,7 +120,7 @@ void communicationLoop(int connection_fd)
         return;;
     }
     // Get second part, with the limit number for guess game
-    string = strtok(NULL, ":"); // pass null as strtok remembers where it left
+    string = strtok(NULL, ":"); // pass null as strtok so it remembers where it left
     limit = atoi(string);
 
     // Generate random number
@@ -139,7 +139,7 @@ void communicationLoop(int connection_fd)
 
         // Get first part
         string= strtok(buffer,":");
-        if(strncmp(string,"START",6)!=0){ // check that its a client to this game
+        if(strncmp(string,"GUESS",6)!=0){ // check that its a client to this game
             printf("Invalid client, Exiting!\n");
             return;;
         }
@@ -148,17 +148,16 @@ void communicationLoop(int connection_fd)
         guess = atoi(string);
 
 
-        if(guess > target ){   // Client needs higher number
-            sprintf(buffer, "lower\n");
-            send(connection_fd, buffer, strlen(buffer)+1, 0);   // the 0 means, option flag
+        if (guess == target){ // Client is right
+            sprintf(buffer, "OK");
+            send(connection_fd, buffer, strlen(buffer)+1, 0); // the 0 means, option flag
             break;
-        }else if(guess < target){ // Client needs lower num
-            sprintf(buffer, "higher\n");
-        }else if(gues == target){ // Client is right
-            sprintf(buffer, "You are correct!!\n");
+        }else if (guess > target) { // client needs lowe
+            sprintf(buffer, "LOWER");
         }else{
-            sprintf(buffer, "correct\n");
+            sprintf(buffer, "HIGHER");
         }
+
 
         //Send reply
         send(connection_fd, buffer, strlen(buffer)+1, 0);
@@ -170,6 +169,7 @@ void communicationLoop(int connection_fd)
          */
     }
     chars_read = receiveMessage(connection_fd, buffer, BUFFER_SIZE);
+    printf("The client sent me: '%s'\n", buffer);
     if(strncmp(buffer, "BYE",4)!=0){ // The client is not using the same protocol
         printf("Invalid client. Exiting!\n");
         return;

@@ -36,16 +36,14 @@ int main(int argc, char * argv[])
     communicationLoop(client_fd);
 
     // Closing the socket
-    printf("Closing the connection "
-           "socket\n");
+    printf("Closing the connection socket\n");
     close(client_fd);
 
     return 0;
 }
 
 // Show the user how to run this program
-void usage(char * program)
-{
+void usage(char * program){
     printf("Usage:\n%s {server_address} {port_number}\n", program);
     exit(EXIT_FAILURE);
 }
@@ -90,11 +88,10 @@ void communicationLoop(int connection_fd){
             printf("You guessed correctly!\n");
             break;
         }
-
         printf("Try again with a '%s' number\n", buffer);
     }
-
-    sprintf(buffer, "BYE", guess); // put guess in buffer
-    send(connection_fd, buffer, strlen(buffer)+1, 0);
-
+    // Close the connection
+    send(connection_fd, "BYE", 4, 0);
+    chars_read = receiveMessage(connection_fd, buffer, BUFFER_SIZE);
+    printf("The server sent me: '%s'\n", buffer);
 }

@@ -49,7 +49,7 @@ node_t * deleteHead(node_t * head){
     return temp; // return the new head
 }
 
-node_t * deleteFromPosition(node_t * head, int position){ // TODO
+node_t * deleteFromPosition(node_t * head, int position){
     if(head == NULL) return head;   // List empty
     if(position > getLength(head)){
         printf("Position is bigger than the size of the list\n");
@@ -92,7 +92,7 @@ int searchIterative (node_t * head, int data){
 }
 
 // Helper methods
-node_t * clear(node_t * head){ // TODO
+node_t * clear(node_t * head){
     if(head == NULL) return head; // List is empty
 
     node_t * tempNode = head->next; // temp is always one ahead, so we can iterate while deleting the previous

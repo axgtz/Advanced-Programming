@@ -14,3 +14,5 @@ add_executable(linked_list Hwk3-LinkedLists/linked_list.c  Hwk3-LinkedLists/test
 add_executable(pipes Processes/pipes.c)
 add_executable(cypherSolver Hwk4-VignereCypher/cypherSolver.c)
 add_executable(02-pipes Hwk4-VignereCypher/02-pipes.c)
+add_executable(client Hwk5-BlackjackServer/client.c)
+add_executable(server Hwk5-BlackjackServer/server.c)
