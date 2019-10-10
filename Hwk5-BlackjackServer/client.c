@@ -144,7 +144,6 @@ void communicationLoop(int connection_fd){
             printf("Guti says \" do you want to hit or stand?\"\n");
             scanf("%s", buffer);
             if(strncmp(buffer, "hit",4) == 0 || strncmp(buffer, "stand",5) == 0){
-                //sprintf(buffer, stringTempBuff); // put OK in buffer to avoid lock
                 send(connection_fd, buffer, strlen(buffer) + 1, 0);
             }else{ // Restart loop
                 continue;
@@ -154,16 +153,17 @@ void communicationLoop(int connection_fd){
             chars_read = receiveMessage(connection_fd, buffer, BUFFER_SIZE);
             stringTempBuff = strtok(buffer, ":"); // Get status
             lastCardClient = atoi(buffer);
-            myHand += lastCardClient;
+            stringTempBuff = strtok(NULL, ":"); // Get status
+            myHand = atoi(buffer);
             printf("Your next card is a %d for a total of %d\n", lastCardClient,myHand);
 
             stringTempBuff = strtok(NULL, ":"); // Get status
             printf("---- %s ----\n", stringTempBuff);
             if(strncmp(stringTempBuff,"WIN", 4) == 0 ){
-                printf("Guti says \"You have won congrats!! Got a 21! Winner winner, chicken dinner! You get 1.5 times your bet\"\n");
+                printf("Guti says \"You have won congrats!! You won! You get 1.5 times your bet\"\n");
                 break;
             }else if(strncmp(stringTempBuff,"LOST", 5) == 0 ){
-                printf("Guti says \"You have lost sorry, not sorry. The dealer got 21\"\n");
+                printf("Guti says \"You have lost sorry, not sorry.\"\n");
                 break;
             }else if(strncmp(stringTempBuff,"DRAW", 5) == 0 ){
                 printf("Guti says \"A draw happened! You both got 21\"\n");
@@ -181,7 +181,17 @@ void communicationLoop(int connection_fd){
             }
         }
 
-        break;
+        chars_read = receiveMessage(connection_fd, buffer, BUFFER_SIZE);
+        stringTempBuff= strtok(buffer,":");
+        if(strncmp(stringTempBuff,"END",4)!=0){
+            printf("Invalid client, Exiting!\n");
+            return;
+        }
+        // Get second part and third part with start money and current
+        stringTempBuff = strtok(NULL, ":"); // Get start money
+        startMoney = atoi(stringTempBuff);
+        stringTempBuff = strtok(NULL, ":"); // Get current money
+        printf("Guti says \"You started with %d and ended with %s\"\n", startMoney,stringTempBuff);
     } // WHILE ENDS_-------------
     //TODO check end
     // Receive answer

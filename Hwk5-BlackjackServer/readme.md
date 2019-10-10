@@ -1,6 +1,6 @@
 # Blackjack Sockets
 
-One Paragraph of project description goes here
+Blackjack game using sockets developed in C.
 
 ## Getting Started
 
@@ -21,12 +21,15 @@ You should have a valid gcc compiler installed in your computer
 A step by step series of examples that tell you how to get the casino working
 
 1- Place all files in the same folder
+
 2- Open the command line and navigate to the folder
+
 3- Run the following command inside the folder
 ```
 make
 ```
 4- If everything is successful, no warnings or errors should appear and .o files should have been created
+
 5- In the same window run the following command
 ```
 ./server 9999
@@ -39,7 +42,7 @@ make
 
 ## Authors
 
-* **Me - Alejandro Gutierrez** - *Initial work* -
+* **Me - Alejandro Gutierrez**
 
 ## Acknowledgments
 
