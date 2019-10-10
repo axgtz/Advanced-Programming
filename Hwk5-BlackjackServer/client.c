@@ -13,7 +13,7 @@
 #include <netdb.h>
 // Include own sockets library
 #include "sockets.h"
-
+#include <stdbool.h>
 #define SERVICE_PORT 9999
 #define BUFFER_SIZE 1024
 
@@ -50,6 +50,7 @@ void communicationLoop(int connection_fd){
     char * stringTempBuff; // Manage buffer divided by :
     int chars_read;
     int startMoney = 0; // Starting Money
+    bool cont = true; // used to break from the second loop
 
     //Welcome message and starting money
     printf("\t-----Welcome to Guti Casino's Inc!-----\n\n");
@@ -58,12 +59,12 @@ void communicationLoop(int connection_fd){
     printf("Enter the money you have to start: ");
     scanf("%d", &startMoney);
 
-    // Handshake, validate correct client with server
+    //-1 - Handshake, validate correct client with server
     // Send a request
     sprintf(buffer, "STARTBLACKJACK:%d", startMoney); // Write in buffer
     send(connection_fd, buffer, strlen(buffer)+1, 0);
 
-    // Receive reply
+    // 0 - Receive reply
     chars_read = receiveMessage(connection_fd, buffer, BUFFER_SIZE);
     if(strncmp(buffer, "CONFIRM", 8) != 0){ // strcmp = string compare
         printf("Invalid server. Exiting!\n");
@@ -72,19 +73,18 @@ void communicationLoop(int connection_fd){
 
     printf("Game READY!\n");
 
-    while(1) { // Game starts
+    while(cont) { // Game starts
         int currentBet = 0;
-        int myHand; // Current amount of clients hand
-        int lastCardClient;
-        int lastCardDealer;
+        int myHand = 0; // Current amount of clients hand
+        int lastCardClient = 0;
 
-        // Send a request, with the bet
+        // 1- Send a request, with the bet
         printf("\nPlace a bet: ");
         scanf("%d", &currentBet);
         sprintf(buffer, "CURRENTBET:%d", currentBet); // put guess in buffer
         send(connection_fd, buffer, strlen(buffer) + 1, 0);
 
-        // Receive answer
+        //3-  Receive answer if bet is okay
         chars_read = receiveMessage(connection_fd, buffer, BUFFER_SIZE);
 
         if(strncmp(buffer, "NOOK",5) == 0){ // Restart loop, to ask for diff money
@@ -98,14 +98,14 @@ void communicationLoop(int connection_fd){
             break;
         }
 
-        // Ask if client ready to start
-        /*printf("\nAre you sure?  yes or no\n");
+        // 4 -Ask if client ready to start
+        printf("\nAre you sure?  yes or no\n");
         scanf("%s", buffer);
         if(strncmp(buffer, "yes",4) != 0){
             sprintf(buffer, "NOK"); // put OK in buffer to avoid lock
             send(connection_fd, buffer, strlen(buffer) + 1, 0);
             continue;
-        }*/
+        }
         sprintf(buffer, "OK"); // put OK in buffer to avoid lock
         send(connection_fd, buffer, strlen(buffer) + 1, 0);
 
@@ -139,13 +139,51 @@ void communicationLoop(int connection_fd){
             printf("SERVER ERROR");
             break;
         }
-        /*while(){
+        while(1){
+            // 5 - Send hit or stand
+            printf("Guti says \" do you want to hit or stand?\"\n");
+            scanf("%s", buffer);
+            if(strncmp(buffer, "hit",4) != 0 || strncmp(buffer, "stand",5) != 0){
+                //sprintf(buffer, stringTempBuff); // put OK in buffer to avoid lock
+                send(connection_fd, buffer, strlen(buffer) + 1, 0);
+            }else{ // Restart loop
+                continue;
+            }
 
-        }*/
+            // 6 - receive 1 card and current result
+            chars_read = receiveMessage(connection_fd, buffer, BUFFER_SIZE);
+            stringTempBuff = strtok(buffer, ":"); // Get status
+            lastCardClient = atoi(buffer);
+            myHand += lastCardClient;
+            printf("Your next card is a %d for a total of %d\n", lastCardClient,myHand);
+
+            stringTempBuff = strtok(NULL, ":"); // Get status
+            printf("--- %s----\n", stringTempBuff);
+            if(strncmp(stringTempBuff,"WIN", 4) == 0 ){
+                printf("Guti says \"You have won congrats!! Got a 21! Winner winner, chicken dinner! You get 1.5 times your bet\"\n");
+                break;
+            }else if(strncmp(stringTempBuff,"LOST", 5) == 0 ){
+                printf("Guti says \"You have lost sorry, not sorry. The dealer got 21\"\n");
+                break;
+            }else if(strncmp(stringTempBuff,"DRAW", 5) == 0 ){
+                printf("Guti says \"A draw happened! You both got 21\"\n");
+                break;
+            }else if(strncmp(stringTempBuff,"CONTINUE", 9) == 0){
+                printf("Guti says \" we continue\"\n");
+            }else{
+                printf("SERVER ERROR");
+                break;
+            }
 
 
+            if(0){ // exit
+                cont = false;
+            }
+        }
+
+        break;
     } // WHILE ENDS_-------------
-
+    //TODO check end
     // Receive answer
     chars_read = receiveMessage(connection_fd, buffer, BUFFER_SIZE);
     stringTempBuff= strtok(buffer,":");
