@@ -25,6 +25,7 @@ void usage(char * program);
 void waitForConnections(int server_fd);
 void communicationLoop(int connection_fd);
 int generateCard();
+void checkStatus(int clientHandTotal, int dealerHandTotal, char * result);
 
 int main(int argc, char * argv[]){
     int server_fd;
@@ -40,7 +41,6 @@ int main(int argc, char * argv[]){
     printf("Closing the server socket\n");
     // Close the socket
     close(server_fd);
-
     return 0;
 }
 
@@ -104,8 +104,6 @@ void communicationLoop(int connection_fd){
     int currentMoney;
     int currentBet;
 
-
-
     // Handshake
     chars_read = receiveMessage(connection_fd, buffer, BUFFER_SIZE);
 
@@ -127,8 +125,11 @@ void communicationLoop(int connection_fd){
     while(1){ // Game loop
         int currentCardClient = 0;
         int currentCardDealer = 0;
-        int dealerHand = 0 ;
-        int clientHand = 0;
+        int clientHand[20] = {0}; // TODO
+        int dealerHand[20] = {0}; // TODO
+        int dealerHandTotal = 0 ;
+        int clientHandTotal = 0;
+        char result[10];
 
         // Get client answer, if empty exit
         chars_read = receiveMessage(connection_fd, buffer, BUFFER_SIZE);
@@ -139,7 +140,7 @@ void communicationLoop(int connection_fd){
         string = strtok(buffer,":");
         if(strncmp(string,"CURRENTBET",10)!=0){ // check that its a client to this game
             printf("Invalid client, Exiting!\n");
-            return;;
+            return;
         }
 
         // Get second part, with the current bet
@@ -159,52 +160,58 @@ void communicationLoop(int connection_fd){
         sprintf(buffer, "OK");
         send(connection_fd, buffer, strlen(buffer)+1, 0);
 
+        // Get client answer of OK
+        chars_read = receiveMessage(connection_fd, buffer, BUFFER_SIZE);
+        if(strncmp(buffer,"OK",3)!=0){ // check that its a client to this game
+            continue;
+        }
+
         // Initialize the random seed outside so it changes
         srand(time(NULL));
 
         // Generate first dealer and client card
         currentCardClient  = generateCard();
         currentCardDealer = generateCard();
-        clientHand = currentCardClient;
-        dealerHand = currentCardDealer;
+        clientHandTotal = currentCardClient;
+        dealerHandTotal = currentCardDealer;
 
-        sprintf(buffer, "CARDS:%d:%d", clientHand, dealerHand);
-        send(connection_fd, buffer, strlen(buffer)+1, 0);
-
-        // Generate dealer second hand which is secret
+        // Generate second
         currentCardClient  = generateCard();
-        currentCardDealer = generateCard();
-        clientHand += currentCardClient;
-        dealerHand += currentCardDealer;
-        sprintf(buffer, "CARDS2:%d:%d:%d", clientHand, dealerHand, currentCardClient);
+        currentCardDealer = generateCard();         // Generate dealer second hand which is secret
+        clientHandTotal += currentCardClient;
+        dealerHandTotal += currentCardDealer;
+
+        // Get status s
+        checkStatus(clientHandTotal, dealerHandTotal, result);
+
+        printf(" SERVER post status\n");
+
+        sprintf(buffer, "%d:%d:%d:%s" ,currentCardClient, (dealerHandTotal - currentCardDealer),currentCardClient , result);
         send(connection_fd, buffer, strlen(buffer)+1, 0);
+        printf(" SERVER post send\n");
 
-        printf("cards 2");
-        // Check 21 and send result
-        if(dealerHand == 21){
-            if(clientHand < 21){// C1: Dealer reached 21 and client no
-                currentMoney -= currentBet;
-                sprintf(buffer, "LOST");
-            }else {// C2: Dealer reached 21 and client reached too
-                sprintf(buffer, "DRAW");
-            }
-            send(connection_fd, buffer, strlen(buffer)+1, 0);
-        }else if(clientHand == 21){// C3: Client wins
-            sprintf(buffer, "WIN");
+        if(strcmp(string,"WIN") == 0 ){
             currentMoney+= (int) (currentBet * 2.5);
-            send(connection_fd, buffer, strlen(buffer)+1, 0);
-        }else{ // C4 : no one reached 21
-            sprintf(buffer, "CONTINUE");
-            send(connection_fd, buffer, strlen(buffer)+1, 0);
-            /*while(dealerHand < 22 || clientHand < 22){
+            break;
+        }else if(strcmp(string,"LOST") == 0 ){
+            currentMoney -= currentBet;
+            break;
+        }else if(strcmp(string,"DRAW") == 0 ){
+            break;
+        } // Else would be continue
+        printf(" SERVER Continue\n");
+        /*
+        while (){
+         //Hit or stand, if stand dealer gets cards out until win or over 21
 
-            }*/
-        }
+        }*/
+
              // TODO think about Ace, ace is 1 until the hand is more than 22
-    }     // WHILE ENDS_-------------
+    }     // WHILE ENDS-------------
 
+    //TODO Recive
 
-sprintf(buffer, "END:%d:%d",startMoney, currentMoney);
+    sprintf(buffer, "END:%d:%d",startMoney, currentMoney);
     send(connection_fd, buffer, strlen(buffer) + 1, 0);
 
     chars_read = receiveMessage(connection_fd, buffer, BUFFER_SIZE);
@@ -217,16 +224,35 @@ sprintf(buffer, "END:%d:%d",startMoney, currentMoney);
 }
 
 // Program to draw cards
-int generateCard(){// TODO ACE
+int generateCard(){
     int card;
 
     // Generate random number
     card = rand() % 13 + 1;
 
-    if(card > 11){ // Joker, Queen, King become 10
+    if(card > 10){ // Joker, Queen, King become 10
         card = 10;
+    }else if(card == 1){ // Ace will be always send as 11 then the server program can decide if it needs to be converted to 1
+        card = 11;
     }
-  //  printf("The card number is: %d\n",card);
+    //printf("The card number is: %d\n",card);
 
     return card;
+}
+
+// Program to see if someone won
+void checkStatus(int clientHandTotal, int dealerHandTotal, char * result){
+
+    // Check 21 and send result
+    if(dealerHandTotal == 21) {
+        if (clientHandTotal == 21) {    // C1: Draw
+            strncpy(result, "DRAW", 5);
+        } else {                        // C2: Dealer Wins
+            strncpy(result, "LOST", 5);
+        }
+    }else if(clientHandTotal == 21) {   // C3: Client Wins
+        strncpy(result, "WIN", 4);
+    }else {// C4 : no one reached 21
+        strncpy(result, "CONTINUE", 9);
+    }
 }

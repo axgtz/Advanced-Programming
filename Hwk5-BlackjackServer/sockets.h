@@ -20,7 +20,7 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 
-#define SERVICE_PORT 8642
+#define SERVICE_PORT 9999
 #define MAX_QUEUE 5
 #define BUFFER_SIZE 1024
 

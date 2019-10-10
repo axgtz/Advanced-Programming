@@ -74,7 +74,7 @@ int startServer(char * port)
         exit(EXIT_FAILURE);
     }
 
-    printf("Server ready and waiting!\n");
+    printf("Casino server ready and waiting!\n");
 
     return server_fd;
 }

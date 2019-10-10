@@ -47,7 +47,7 @@ void usage(char * program){
 // Do the actual receiving and sending of data
 void communicationLoop(int connection_fd){
     char buffer[BUFFER_SIZE];
-    char * string; // Manage buffer divided by :
+    char * stringTempBuff; // Manage buffer divided by :
     int chars_read;
     int startMoney = 0; // Starting Money
 
@@ -75,20 +75,17 @@ void communicationLoop(int connection_fd){
     while(1) { // Game starts
         int currentBet = 0;
         int myHand; // Current amount of clients hand
-        int lastCard;
+        int lastCardClient;
+        int lastCardDealer;
 
         // Send a request, with the bet
-        printf("Place a bet: ");
+        printf("\nPlace a bet: ");
         scanf("%d", &currentBet);
         sprintf(buffer, "CURRENTBET:%d", currentBet); // put guess in buffer
         send(connection_fd, buffer, strlen(buffer) + 1, 0);
 
-        // Receive answer //TODO ASK GIL about checking info
+        // Receive answer
         chars_read = receiveMessage(connection_fd, buffer, BUFFER_SIZE);
-        if (chars_read <= 0) { // Check if contains info
-            printf("SERVER ERROR");
-            break;
-        }
 
         if(strncmp(buffer, "NOOK",5) == 0){ // Restart loop, to ask for diff money
             printf("Guti says \"Your bet is higher than what you currently have, please bet less\"\n");
@@ -101,65 +98,66 @@ void communicationLoop(int connection_fd){
             break;
         }
 
+        // Ask if client ready to start
+        /*printf("\nAre you sure?  yes or no\n");
+        scanf("%s", buffer);
+        if(strncmp(buffer, "yes",4) != 0){
+            sprintf(buffer, "NOK"); // put OK in buffer to avoid lock
+            send(connection_fd, buffer, strlen(buffer) + 1, 0);
+            continue;
+        }*/
+        sprintf(buffer, "OK"); // put OK in buffer to avoid lock
+        send(connection_fd, buffer, strlen(buffer) + 1, 0);
+
         // Get first cards
         chars_read = receiveMessage(connection_fd, buffer, BUFFER_SIZE);
-        string = strtok(buffer,":");
-        if(strncmp(buffer, "CARDS",6) != 0) {
+        stringTempBuff = strtok(buffer,":"); // Get client hand, first card
+        lastCardClient = atoi(stringTempBuff);
+        myHand = lastCardClient;
+        stringTempBuff = strtok(NULL,":"); // Get dealer hand, first card
+        printf("Your first card is a %d and the dealer got a %s\n", lastCardClient,stringTempBuff);
+
+        // Get second hand client, total dealer and status
+        stringTempBuff = strtok(NULL,":"); // Get current Card client
+        lastCardClient = atoi(stringTempBuff);
+        myHand+= lastCardClient; // add new card to client total
+        printf("Your second card is a %d for a total of %d\n", lastCardClient,myHand);
+
+        stringTempBuff = strtok(NULL, ":"); // Get status
+        if(strncmp(stringTempBuff,"WIN", 4) == 0 ){
+            printf("Guti says \"You have won congrats!! Got a natural 21! Winner winner, chicken dinner! You get 1.5 times your bet\"\n");
+            break;
+        }else if(strncmp(stringTempBuff,"LOST", 5) == 0 ){
+            printf("Guti says \"You have lost sorry, not sorry. The dealer got 21\"\n");
+            break;
+        }else if(strncmp(stringTempBuff,"DRAW", 5) == 0 ){
+            printf("Guti says \"A draw happened! You both got 21\"\n");
+            break;
+        }else if(strncmp(stringTempBuff,"CONTINUE", 9) == 0){
+            printf("Guti says \" we continue\"\n");
+        }else{
             printf("SERVER ERROR");
             break;
         }
+        /*while(){
 
-        string = strtok(NULL, ":"); // Get client hand money
-        lastCard = atoi(string);
-        myHand = lastCard;
-        string = strtok(NULL, ":"); // Get current money
-        printf("Your first card is a %d and the dealer got a %s\n", myHand,string);
-
-        // Get second card, only the client
-        chars_read = receiveMessage(connection_fd, buffer, BUFFER_SIZE);
-        string = strtok(buffer,":");
-        if(strncmp(buffer, "CARDS2",7) != 0) {
-            printf("SERVER ERROR");
-            break;
-        }
-
-        string = strtok(NULL, ":"); // Get client hand money
-        lastCard = atoi(string);
-        myHand += lastCard;
-        string = strtok(NULL, ":"); // Get current money
-        printf("Your second card is a %d for a total of %d\n", lastCard,myHand);
-
-
-        chars_read = receiveMessage(connection_fd, buffer, BUFFER_SIZE);
-        if(strncmp(buffer, "CONTINUE",9) != 0){
-            printf("Guti says \"You have no money sorry, not sorry\"\n");
-
-        }else if(strncmp(buffer, "LOST",5) != 0){
-            printf("House got BLACKJACK! You loose %d\n", currentBet);
-        }else if(strncmp(buffer, "DRAW",5) != 0){
-            printf("House got BLACKJACK! and you got BLACKJACK! You get your current bet back %d\n", currentBet);
-        }else if(strncmp(buffer, "WIN",4) != 0){
-            printf("You got BLACKJACK! You win %d\n", (int)( currentBet * 2.5));
-        }else{ // WRONG
-            printf("SERVER ERROR");
-            break;
-        }
+        }*/
 
 
     } // WHILE ENDS_-------------
 
     // Receive answer
     chars_read = receiveMessage(connection_fd, buffer, BUFFER_SIZE);
-    string= strtok(buffer,":");
-    if(strncmp(string,"END",4)!=0){
+    stringTempBuff= strtok(buffer,":");
+    if(strncmp(stringTempBuff,"END",4)!=0){
         printf("Invalid client, Exiting!\n");
         return;
     }
     // Get second part and third part with start money and current
-    string = strtok(NULL, ":"); // Get start money
-    startMoney = atoi(string);
-    string = strtok(NULL, ":"); // Get current money
-    printf("Guti says \"You started with %d and ended with %s\"\n", startMoney,string);
+    stringTempBuff = strtok(NULL, ":"); // Get start money
+    startMoney = atoi(stringTempBuff);
+    stringTempBuff = strtok(NULL, ":"); // Get current money
+    printf("Guti says \"You started with %d and ended with %s\"\n", startMoney,stringTempBuff);
 
 
     // Close the connection
