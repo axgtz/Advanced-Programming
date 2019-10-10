@@ -143,7 +143,7 @@ void communicationLoop(int connection_fd){
             // 5 - Send hit or stand
             printf("Guti says \" do you want to hit or stand?\"\n");
             scanf("%s", buffer);
-            if(strncmp(buffer, "hit",4) != 0 || strncmp(buffer, "stand",5) != 0){
+            if(strncmp(buffer, "hit",4) == 0 || strncmp(buffer, "stand",5) == 0){
                 //sprintf(buffer, stringTempBuff); // put OK in buffer to avoid lock
                 send(connection_fd, buffer, strlen(buffer) + 1, 0);
             }else{ // Restart loop
@@ -158,7 +158,7 @@ void communicationLoop(int connection_fd){
             printf("Your next card is a %d for a total of %d\n", lastCardClient,myHand);
 
             stringTempBuff = strtok(NULL, ":"); // Get status
-            printf("--- %s----\n", stringTempBuff);
+            printf("---- %s ----\n", stringTempBuff);
             if(strncmp(stringTempBuff,"WIN", 4) == 0 ){
                 printf("Guti says \"You have won congrats!! Got a 21! Winner winner, chicken dinner! You get 1.5 times your bet\"\n");
                 break;
