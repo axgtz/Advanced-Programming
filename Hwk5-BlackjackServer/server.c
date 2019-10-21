@@ -127,8 +127,8 @@ void communicationLoop(int connection_fd){
     while(cont){ // Game loop
         int currentCardClient = 0;
         int currentCardDealer = 0;
-        int numAcesClient = 0; // TODO
-        int numAcesDealer = 0; // TODO
+        int numAcesClient = 0;
+        int numAcesDealer = 0;
         int dealerHandTotal = 0 ;
         int clientHandTotal = 0;
         char result[10];
@@ -193,13 +193,13 @@ void communicationLoop(int connection_fd){
         sprintf(buffer, "%d:%d:%d:%s" ,currentCardClient, (dealerHandTotal - currentCardDealer),currentCardClient , result);
         send(connection_fd, buffer, strlen(buffer)+1, 0);
 
-        if(strcmp(result,"WIN") == 0 ){
+        if(strncmp(result,"WIN", 4) == 0 ){
             currentMoney+= (int) (currentBet * 2.5);
             break;
-        }else if(strcmp(result,"LOST") == 0 ){
+        }else if(strncmp(result,"LOST",5) == 0 ){
             currentMoney -= currentBet;
             break;
-        }else if(strcmp(result,"DRAW") == 0 ){
+        }else if(strncmp(result,"DRAW",5) == 0 ){
             break;
         } // Else would be continue
 
@@ -232,8 +232,6 @@ void communicationLoop(int connection_fd){
                                 }
                             }
                         }
-                        printf("SERVER check status 2 win? \n");
-
                         checkStatus(&clientHandTotal, &dealerHandTotal, result, &numAcesClient, &numAcesDealer);
                         sprintf(buffer, "%d:%d:%s" ,currentCardClient, clientHandTotal, result);
                         send(connection_fd, buffer, strlen(buffer)+1, 0);
@@ -251,17 +249,17 @@ void communicationLoop(int connection_fd){
                     send(connection_fd, buffer, strlen(buffer)+1, 0);
                     break;
                 } // Continue
-                if(strcmp(result,"WIN") == 0 ){
+                if(strncmp(result,"WIN",4) == 0 ){
                     if(clientHandTotal == 21){
                         currentMoney+= (int) (currentBet * 2.5);
                     }else{
                         currentMoney+= (int) (currentBet * 1.5);
                     }
                     break;
-                }else if(strcmp(result,"LOST") == 0 ){
+                }else if(strncmp(result,"LOST",5) == 0 ){
                     currentMoney -= currentBet;
                     break;
-                }else if(strcmp(result,"DRAW") == 0 ){
+                }else if(strncmp(result,"DRAW",5) == 0 ){
                     break;
                 } // Else would be continue, so asks for new card
 
@@ -270,8 +268,6 @@ void communicationLoop(int connection_fd){
 
             }else if(strncmp(buffer,"stand",6)==0){ // 6.5 - dealer needs to go over 17 or go bust
                 checkStatus(&clientHandTotal, &dealerHandTotal, result, &numAcesClient, &numAcesDealer);
-                printf(" SERVER STAND %s\n", result);
-
                 if(clientHandTotal > dealerHandTotal && dealerHandTotal > 17){
                     strncpy(result, "WIN", 4);
                     if(clientHandTotal == 21){
@@ -284,7 +280,7 @@ void communicationLoop(int connection_fd){
 
                     break;
                 }else{
-                    if(strcmp(result,"LOST") != 0 ){
+                    if(strncmp(result,"LOST", 5) != 0 ){
                         if(dealerHandTotal < 18){ // If dealer hand less than 18, he can ask for more cards
                             while(dealerHandTotal < 18){
                                 currentCardDealer = generateCard();         // Generate dealer second hand which is secret
@@ -342,7 +338,6 @@ void communicationLoop(int connection_fd){
                             }
                         }
                         checkStatus(&clientHandTotal, &dealerHandTotal, result, &numAcesClient, &numAcesDealer);
-                        printf("SERVER check status 2 win? %s--- \n", result);
 
                         if(clientHandTotal > dealerHandTotal){
                             strncpy(result, "WIN", 4);
@@ -356,7 +351,6 @@ void communicationLoop(int connection_fd){
                         break;
                     }
                     checkStatus(&clientHandTotal, &dealerHandTotal, result, &numAcesClient, &numAcesDealer);
-                    printf("SERVER check status 33 win? %s--- \n", result);
 
                     if(clientHandTotal > dealerHandTotal){
                         strncpy(result, "WIN", 4);
@@ -369,22 +363,16 @@ void communicationLoop(int connection_fd){
                     send(connection_fd, buffer, strlen(buffer)+1, 0);
                     break;
                 }
-
-
-                sprintf(buffer, "%d:%d:%s" ,currentCardClient, clientHandTotal, result);
-                send(connection_fd, buffer, strlen(buffer)+1, 0);
-
             }else{ // Wrong , exit from 2 loops
                 cont = false;
                 break;
             }
         }
+        currentBet = 0;
 
         sprintf(buffer, "END:%d:%d",startMoney, currentMoney);
         send(connection_fd, buffer, strlen(buffer) + 1, 0);
     }     // WHILE ENDS-------------
-
-    //TODO Receive
 
     sprintf(buffer, "END:%d:%d",startMoney, currentMoney);
     send(connection_fd, buffer, strlen(buffer) + 1, 0);
@@ -417,7 +405,6 @@ int generateCard(){
 
 // Program to see if someone won
 void checkStatus(int * clientHandTotal, int * dealerHandTotal, char * result, int *  numAcesClient, int * numAcesDealer){
-    printf(" Check status client hand todtal: %d dealer: %d ClientA: %d Dealer Aces:%d\n", *clientHandTotal, *dealerHandTotal, *numAcesClient,*numAcesDealer);
     // Check 21 and send result
     if(*dealerHandTotal == 21) {
         if (*clientHandTotal == 21) {    // C1: Draw

@@ -140,10 +140,16 @@ void communicationLoop(int connection_fd){
             break;
         }
         while(1){
+            bool stand = false;
             // 5 - Send hit or stand
             printf("Guti says \" do you want to hit or stand?\"\n");
-            scanf("%s", buffer);
+            //scanf("%s", buffer);
             if(strncmp(buffer, "hit",4) == 0 || strncmp(buffer, "stand",5) == 0){
+                if(strncmp(buffer, "hit",4) == 0){
+                    stand = false;
+                }else{
+                    stand = true;
+                }
                 send(connection_fd, buffer, strlen(buffer) + 1, 0);
             }else{ // Restart loop
                 continue;
@@ -152,13 +158,14 @@ void communicationLoop(int connection_fd){
             // 6 - receive 1 card and current result
             chars_read = receiveMessage(connection_fd, buffer, BUFFER_SIZE);
             stringTempBuff = strtok(buffer, ":"); // Get status
-            lastCardClient = atoi(buffer);
+            lastCardClient = atoi(stringTempBuff);
             stringTempBuff = strtok(NULL, ":"); // Get status
-            myHand = atoi(buffer);
-            printf("Your next card is a %d for a total of %d\n", lastCardClient,myHand);
+            myHand = atoi(stringTempBuff);
+            if(!stand){
+                printf("Your next card is a %d for a total of %d\n", lastCardClient,myHand);
+            }
 
             stringTempBuff = strtok(NULL, ":"); // Get status
-            printf("---- %s ----\n", stringTempBuff);
             if(strncmp(stringTempBuff,"WIN", 4) == 0 ){
                 printf("Guti says \"You have won congrats!! You won! You get 1.5 times your bet\"\n");
                 break;
@@ -174,11 +181,6 @@ void communicationLoop(int connection_fd){
                 printf("SERVER ERROR");
                 break;
             }
-
-
-            if(0){ // exit
-                cont = false;
-            }
         }
 
         chars_read = receiveMessage(connection_fd, buffer, BUFFER_SIZE);
@@ -193,8 +195,7 @@ void communicationLoop(int connection_fd){
         stringTempBuff = strtok(NULL, ":"); // Get current money
         printf("Guti says \"You started with %d and ended with %s\"\n", startMoney,stringTempBuff);
     } // WHILE ENDS_-------------
-    //TODO check end
-    // Receive answer
+
     chars_read = receiveMessage(connection_fd, buffer, BUFFER_SIZE);
     stringTempBuff= strtok(buffer,":");
     if(strncmp(stringTempBuff,"END",4)!=0){
