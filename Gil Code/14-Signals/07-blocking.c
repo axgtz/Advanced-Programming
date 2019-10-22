@@ -22,8 +22,7 @@ void unsetMask(sigset_t old_set);
 void detectBlocked(int signal);
 void waitLoop();
 
-int main(int argc, char * argv[])
-{
+int main(int argc, char * argv[]){
     int seconds;
     sigset_t old_set;
 
@@ -55,8 +54,7 @@ int main(int argc, char * argv[])
 // Function definitions
 
 // Modify the signal mask. Define to block SIGINT
-sigset_t setupMask()
-{
+sigset_t setupMask(){
     sigset_t new_set;
     sigset_t old_set;
     //Clear the new set. Just to be sure it comes with no garbage

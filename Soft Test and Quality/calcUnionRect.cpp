@@ -1,6 +1,12 @@
 //  A01019608
 // Created by Roberto Alejandro Gutierrez Guillen on 2019-10-18.
-//
+
+
+
+
+
+
+// Doesnt work, it takes into account too many intercepts
 #include <iostream>
 #include <vector>
 #include <math.h>
