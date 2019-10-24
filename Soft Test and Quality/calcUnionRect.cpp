@@ -1,10 +1,20 @@
 //  A01019608
 // Created by Roberto Alejandro Gutierrez Guillen on 2019-10-18.
+#include <iostream>
+#include <vector>
+#include <math.h>
+
+using namespace std;
 
 
 
 
 
+
+
+
+
+/*
 
 // Doesnt work, it takes into account too many intercepts
 #include <iostream>
@@ -122,3 +132,4 @@ int main(){
     cout << calcUnion(v) << "\n";
     return 0;
 }
+*/
