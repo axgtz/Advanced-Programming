@@ -42,6 +42,7 @@ sigset_t setupMask();
 int main(int argc, char * argv[]){
     int connection_fd;
     setUpHandlers();
+    setupMask();
 
     printf("\n=== CLIENT FOR COMPUTING THE VALUE OF pi ===\n");
 
@@ -147,20 +148,13 @@ void detectInterruption(int signal){
 
 // Modify the signal mask. Define to block SIGINT
 sigset_t setupMask(){
-    sigset_t new_set;
-    sigset_t old_set;
-    //Clear the new set. Just to be sure it comes with no garbage
-    sigemptyset(&new_set);
-    // Add signal SIGINT to the new_set. These signals are the ones to be blocked
-    sigaddset(&new_set,SIGINT); // SIGINT is now is new_set = ctrl+c
-    sigaddset(&new_set,SIGTSTP); // ctrl+z
+    sigset_t mask;
 
-    if(sigismember(&new_set,SIGSTOP))
-        printf("SIGSTOP is member of new_set\n");
+    // Add all signals to block
+    sigfillset(&mask);
+    sigdelset(&mask, SIGINT); Dont block SIGINT
 
     // Apply the set to the program. The program has a "default" set (think of it as a "third set"), and it is now replaced by the new_set
-    sigprocmask(SIG_BLOCK,&new_set,&old_set); //old set is the set of signals that the program started with. It is empty
-    // sigblock añade las señales que estan en new_set al programa
-    return old_set;
-
+    sigprocmask(SIG_BLOCK,&new_set,NULL);
 }
+
