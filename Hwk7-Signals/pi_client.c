@@ -111,7 +111,9 @@ void requestPI(int connection_fd){
                 break;
             }
         }else{ // if less than 0, poll error
-            perror("Poll failed");
+            sprintf(buffer, "q"); // TODO
+            sendString(connection_fd, buffer);
+            perror("Poll failed client");
             break;
         }
 

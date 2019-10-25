@@ -103,12 +103,11 @@ void waitForConnections(int server_fd){
 
     while (!interrupted){
 
-        while(1){ // While to keep polling
+        while(!interrupted){ // While to keep polling //TODO
             pollRes = poll(&serverPoll,1, TIMEOUT*100);
             if(pollRes == 0){ // timeout ended
                 printf(".");
                 fflush(stdout);
-                continue;
             }else if(pollRes > 0){  // check if
                 if(serverPoll.revents & POLLIN){ // check bitmask returned events if it was CTRL - C
                     // ACCEPT
@@ -119,9 +118,8 @@ void waitForConnections(int server_fd){
                     }
                     break;
                 }
-                //TODO ??
             }else{ // if less than 0, poll error
-                perror("Poll failed");
+                perror("Poll failed server");
                 break;
             }
         }
@@ -145,8 +143,10 @@ void waitForConnections(int server_fd){
                 printf("Child process %d dealing with client\n", getpid());
                 //--------- Deal with the client----------
                 attendRequest(client_fd);
+
                 // Close the new socket
                 close(client_fd);
+
                 // Terminate the child process
                 exit(EXIT_SUCCESS);
             }else{
@@ -204,7 +204,7 @@ void attendRequest(int client_fd){
                 break;
             }
         }else{ // if less than 0, poll error
-            perror("You killed him");
+            perror("You killed him, poor server");
             break;
         }
 
@@ -212,7 +212,7 @@ void attendRequest(int client_fd){
     }
 
 
-    printf(" > Sending PI=%.20lf\n Iterations %lu\n", result,counter);
+    printf(" > Sending PI=%.20lf \t Iterations %lu\n", result,counter);
 
     // Prepare the response to the client
     sprintf(buffer, "%.20lf\n%lu", result, counter); // put result and iteration
