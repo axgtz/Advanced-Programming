@@ -36,7 +36,7 @@ void usage(char * program);
 void requestPI(int connection_fd);
 void detectInterruption(int signal);
 void setUpHandlers();
-sigset_t setupMask();
+void setupMask();
 
 ///// MAIN FUNCTION
 int main(int argc, char * argv[]){
@@ -102,12 +102,14 @@ void requestPI(int connection_fd){
         pollRes = poll(&clientPoll,1, TIMEOUT);
 
         if(pollRes == 0){ // timeout ended
-            continue; //TODO ask gil
+            continue;
         }else if(pollRes > 0){  // check if
             if(clientPoll.revents & POLLIN){ // check bitmask returned events if it was CTRL - C
+                sprintf(buffer, "q");
+                sendString(connection_fd, buffer);
+
                 break;
             }
-            //TODO ??
         }else{ // if less than 0, poll error
             perror("Poll failed");
             break;
@@ -119,10 +121,10 @@ void requestPI(int connection_fd){
     // RECV
     // Receive the request
     recvString(connection_fd, buffer, BUFFER_SIZE);
-    sscanf(buffer, "%lf", &result);
+    sscanf(buffer, "%lf\n%lu", &result, &iterations);
 
     // Print the result
-    printf("The value for PI is: %.20lf\n", result);
+    printf("The value for PI is: %.20lf computed with %lu iterations\n", result, iterations);
 }
 
 void setUpHandlers(){
@@ -147,14 +149,14 @@ void detectInterruption(int signal){
 }
 
 // Modify the signal mask. Define to block SIGINT
-sigset_t setupMask(){
+void setupMask(){
     sigset_t mask;
 
     // Add all signals to block
     sigfillset(&mask);
-    sigdelset(&mask, SIGINT); Dont block SIGINT
+    sigdelset(&mask, SIGINT); // Dont block SIGINT
 
     // Apply the set to the program. The program has a "default" set (think of it as a "third set"), and it is now replaced by the new_set
-    sigprocmask(SIG_BLOCK,&new_set,NULL);
+    sigprocmask(SIG_BLOCK,&mask,NULL);
 }
 

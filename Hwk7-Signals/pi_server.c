@@ -40,13 +40,14 @@ void waitForConnections(int server_fd);
 void attendRequest(int client_fd);
 void detectInterruption(int signal);
 void setUpHandlers();
-sigset_t setupMask();
+void setupMask();
 
 ///// MAIN FUNCTION
 int main(int argc, char * argv[])
 {
     int server_fd;
     setUpHandlers();
+    setupMask();
 
     printf("\n=== SERVER FOR COMPUTING THE VALUE OF pi ===\n");
 
@@ -197,13 +198,13 @@ void attendRequest(int client_fd){
             continue;
         }else if(pollRes > 0){  // check if
             if(serverPoll.revents & POLLIN){ // check bitmask returned events if it was CTRL - C
-                // TODO Receive request
+                // TODO recieve CTRC -C of client result
+                recvString(client_fd, buffer, BUFFER_SIZE);
 
                 break;
             }
-            //TODO ??
         }else{ // if less than 0, poll error
-            perror("Poll failed");
+            perror("You killed him");
             break;
         }
 
@@ -211,15 +212,13 @@ void attendRequest(int client_fd){
     }
 
 
-    printf(" > Sending PI=%.20lf\n", result);
+    printf(" > Sending PI=%.20lf\n Iterations %lu\n", result,counter);
 
     // Prepare the response to the client
-    sprintf(buffer, "%.20lf", result);
+    sprintf(buffer, "%.20lf\n%lu", result, counter); // put result and iteration
     // SEND
     // Send the response
     sendString(client_fd, buffer);
-
-    // Recive ack?
 }
 
 void setUpHandlers(){
@@ -242,15 +241,14 @@ void detectInterruption(int signal){
     interrupted = 1; // Change global variable, only way to do it =(
 }
 
-
 // Modify the signal mask. Define to block SIGINT
-sigset_t setupMask(){
+void setupMask(){
     sigset_t mask;
 
     // Add all signals to block
     sigfillset(&mask);
-    sigdelset(&mask, SIGINT); Dont block SIGINT
+    sigdelset(&mask, SIGINT); // Dont block SIGINT
 
     // Apply the set to the program. The program has a "default" set (think of it as a "third set"), and it is now replaced by the new_set
-    sigprocmask(SIG_BLOCK,&new_set,NULL);
+    sigprocmask(SIG_BLOCK,&mask,NULL);
 }
