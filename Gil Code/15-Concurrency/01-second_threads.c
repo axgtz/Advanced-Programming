@@ -27,8 +27,7 @@ int main()
     index = malloc(num_threads * sizeof(int));
 
     // Create a new thread with the function as a starting point
-    for (i=0; i<num_threads; i++)
-    {
+    for (i=0; i<num_threads; i++){
         index[i] = i + 1;
         pthread_create(&tid, NULL, threadStart, &index[i]);
         //printf("Created a new thread with id: %ld\n", tid);
