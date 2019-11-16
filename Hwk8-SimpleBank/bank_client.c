@@ -1,17 +1,22 @@
 /*
-    Client program to access the accounts in the bank
-    This program connects to the server using sockets
+        Client program to access the accounts in the bank
+        This program connects to the server using sockets
 
-    Gilberto Echeverria
-    gilecheverria@yahoo.com
-    29/03/2018
-    07/11/2019  Split 'bankOperations' into three functions
+        Gilberto Echeverria
+        gilecheverria@yahoo.com
+        29/03/2018
+        07/11/2019  Split 'bankOperations' into three functions
+    Roberto Alejandro Gutierrez Guillén
+    A01019608
 */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+// Signals library
+#include <errno.h>
+#include <signal.h>
 // Sockets libraries
 #include <netdb.h>
 #include <arpa/inet.h>
@@ -21,23 +26,29 @@
 #include "fatal_error.h"
 
 #define BUFFER_SIZE 1024
+int interrupted = 0;
 
 ///// FUNCTION DECLARATIONS
 void usage(char * program);
+void detectInterruption(int signal);
+void setUpHandlers();
+void setupMask();
+
 void bankOperations(int connection_fd);
 void displayResult(int status, int account_from, float balance);
 int getOptionInputs(int option, int * account_to, int * account_from, float * amount, operation_t * operation);
 
 ///// MAIN FUNCTION
-int main(int argc, char * argv[])
-{
+int main(int argc, char * argv[]){
     int connection_fd;
+
+    setUpHandlers();
+    setupMask();
 
     printf("\n=== BANK CLIENT PROGRAM ===\n");
 
     // Check the correct arguments
-    if (argc != 3)
-    {
+    if (argc != 3){
         usage(argv[0]);
     }
 
@@ -56,18 +67,47 @@ int main(int argc, char * argv[])
 /*
     Explanation to the user of the parameters required to run the program
 */
-void usage(char * program)
-{
+void usage(char * program){
     printf("Usage:\n");
     printf("\t%s {server_address} {port_number}\n", program);
     exit(EXIT_FAILURE);
 }
 
-/*
-    Main menu with the options available to the user
-*/
-void bankOperations(int connection_fd)
-{
+void setUpHandlers(){
+    struct sigaction new_action;
+
+    // Prepare structure, block all signals
+    new_action.sa_handler = detectInterruption;
+
+    // Clear Flags
+    new_action.sa_flags = 0;
+    sigfillset(&new_action.sa_mask);
+
+    // Catch signal CTRL-C
+    sigaction(SIGINT, &new_action, NULL); // Do i put old action?
+}
+
+// Signal handler
+void detectInterruption(int signal){
+    printf("Detected CTRL-C\n");
+
+    interrupted = 1; // Change global variable, only way to do it =(
+}
+
+// Modify the signal mask. Define to block SIGINT
+void setupMask(){
+    sigset_t mask;
+
+    // Add all signals to block
+    sigfillset(&mask);
+    sigdelset(&mask, SIGINT); // Dont block SIGINT
+
+    // Apply the set to the program. The program has a "default" set (think of it as a "third set"), and it is now replaced by the new_set
+    sigprocmask(SIG_BLOCK,&mask,NULL);
+}
+
+/*Main menu with the options available to the user*/
+void bankOperations(int connection_fd){
     char buffer[BUFFER_SIZE];
     int account_from;
     int account_to;
@@ -77,8 +117,7 @@ void bankOperations(int connection_fd)
     int status;
     operation_t operation;
 
-    while (option != 'x')
-    {
+    while (option != 'x'){ // TODO interruption
         printf("\n=== BANK MENU ===\n");
         printf("\tc. Check balance\n");
         printf("\td. Deposit into account\n");
@@ -89,8 +128,7 @@ void bankOperations(int connection_fd)
         scanf(" %c", &option);
 
         // Get inputs 
-        if (!getOptionInputs(option, &account_to, &account_from, &amount, &operation))
-        {
+        if (!getOptionInputs(option, &account_to, &account_from, &amount, &operation)){
             // If the option selected was not valid, skip the rest of this loop
             continue;
         }
@@ -106,14 +144,13 @@ void bankOperations(int connection_fd)
 
         // RECV
         // Receive the response
-        if ( !recvString(connection_fd, buffer, BUFFER_SIZE) )
-        {
+        if ( !recvString(connection_fd, buffer, BUFFER_SIZE) ){
             printf("Server closed the connection\n");
             break;
         }
         // Extract the data
         sscanf(buffer, "%d %f", &status, &balance);
-
+        printf("\n client recieved %d %f", status, balance);
         // Print the corresponding message
         displayResult(status, account_from, balance);
     }
@@ -123,15 +160,13 @@ void bankOperations(int connection_fd)
 /*
    Get the data necessary depending on the operation selected by the user
 */
-int getOptionInputs(int option, int * account_to, int * account_from, float * amount, operation_t * operation)
-{
+int getOptionInputs(int option, int * account_to, int * account_from, float * amount, operation_t * operation){
     // Init variables to default values
     *account_from = 0;
     *account_to = 0;
     *amount = 0;
 
-    switch(option)
-    {
+    switch(option){
         // Check balance
         case 'c':
             printf("Enter account: ");
@@ -150,7 +185,7 @@ int getOptionInputs(int option, int * account_to, int * account_from, float * am
         case 'w':
             printf("Enter source account: ");
             scanf("%d", account_from);
-            printf("Enter the amount to deposit: ");
+            printf("Enter the amount to withdraw: ");
             scanf("%f", amount);
             *operation = WITHDRAW;
             break;
@@ -160,7 +195,7 @@ int getOptionInputs(int option, int * account_to, int * account_from, float * am
             scanf("%d", account_from);
             printf("Enter destination account: ");
             scanf("%d", account_to);
-            printf("Enter the amount to deposit: ");
+            printf("Enter the amount to transfer: ");
             scanf("%f", amount);
             *operation = TRANSFER;
             break;
@@ -181,14 +216,10 @@ int getOptionInputs(int option, int * account_to, int * account_from, float * am
 }
 
 
-/*
-   Show a message depending on the server reply
-*/
-void displayResult(int status, int account_from, float balance)
-{
+/*Show a message depending on the server reply*/
+void displayResult(int status, int account_from, float balance){
     // Print the message corresponding to the result
-    switch (status)
-    {
+    switch (status){
         case OK:
             printf("\tThe balance in account %d is %.2f\n", account_from, balance);
             break;
@@ -196,7 +227,7 @@ void displayResult(int status, int account_from, float balance)
             printf("\tInsufficient funds for the transaction selected\n");
             break;
         case NO_ACCOUNT:
-            printf("\tInvalid acount number entered\n");
+            printf("\tInvalid account number entered\n");
             break;
         case BYE:
             printf("\tThanks for connecting to the bank. Good bye!\n");
@@ -206,3 +237,4 @@ void displayResult(int status, int account_from, float balance)
             break;
     }
 }
+

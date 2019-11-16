@@ -7,20 +7,19 @@
 # The header files
 #DEPENDS = 
 # The executable programs to be created
-PROGRAMS = 01-first_threads 02-structs 03-bad_counts 04-good_counts \
-           05-deadlock 06-trylock
+PROGRAMS = 00-first_omp #05-sum_numbers_omp 06-sum_numbers_omp
 
 ### Variables for the compilation rules ###
 # These should work for most projects, but can be modified when necessary
 # The compiler program to use
 CC = gcc
 # Options to use when compiling object files
-# NOTE the use of gnu99, because otherwise the socket structures are not included
+# NOTE the use of gnu11, because otherwise the socket structures are not included
 #  http://stackoverflow.com/questions/12024703/why-cant-getaddrinfo-be-found-when-compiling-with-gcc-and-std-c99
-CFLAGS = -Wall -g -std=gnu99 -pedantic # -O2
+CFLAGS = -Wall -g -std=gnu11 -pedantic -fopenmp # -O2
 # Options to use for the final linking process
 # This one links the pthreads library
-LDLIBS = -lpthread
+LDLIBS = -lm
 
 ### The rules ###
 # These should work for most projects without change
@@ -43,12 +42,6 @@ $(PROGRAM): $(PROGRAM).o $(OBJECTS)
 # Clear the compiled files
 clean:
 	rm -rf *.o $(PROGRAMS)
-
-# Create a zip with the source code of the project
-# Useful for submitting assignments
-# Will clean the compilation first
-zip: clean
-	zip -r $(MAIN).zip *
 	
 # Indicate the rules that do not refer to a file
-.PHONY: clean all zip
+.PHONY: clean all
