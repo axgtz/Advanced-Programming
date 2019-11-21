@@ -19,8 +19,8 @@ void allocateImage(image_t * image)
 {
     int i;
 
-    printf("\nGetting memory for the pixels\n");
-    printf("Size: %d x %d = %d\n", image->width, image->height, image->width * image->height);
+    // printf("\nGetting memory for the pixels\n");
+    // printf("Size: %d x %d = %d\n", image->width, image->height, image->width * image->height);
 
     // Allocate memory for the pointers to the rows
     image->pixels = (pixel_t **) malloc(image->height * sizeof (pixel_t *));
