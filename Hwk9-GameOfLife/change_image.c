@@ -55,10 +55,11 @@ void masterLife(pgm_t * image){
     for(int i = 0;i < MAXIT ; i++){
         printf("Iteration %d\n",i);
         //checkNeighbours(image, newImage);
-        sprintf(out_filename, "%s_%d.pgm",iterationName,i);
+        sprintf(out_filename, "Result/%s_%d.pgm",iterationName,i);
         printf("%s\n",out_filename);
         //writePGMFile(out_filename, &newImage);
         // TODO copy new to old
+        // TODO incluir carpeta cuando se guarde imagen
     }
 
     freeImage(&newImage.image);
@@ -92,7 +93,6 @@ void checkNeighbours(pgm_t * image, pgm_t * newImage){
 
             }
             newImage->image.pixels[i][j].value = 1;
-
         }
     }
 
@@ -100,6 +100,14 @@ void checkNeighbours(pgm_t * image, pgm_t * newImage){
 
 int countNeighbours(pgm_t * image,int i, int j){ // TODO 
     int numNeighbours = 0;
+    /*
+        1 2 3   [0][0] [0][1] [0][2]
+        4 i 6   [1][0] [1][1] [1][2]
+        7 8 9   [2][0] [2][1] [2][2]
+    */
+    newImage->image.pixels[i-1][j].value == 1 ? printf("YES") : printf("NO");
+    0 > 1 ? printf("YES") : printf("NO");
+   
 
 
 }
