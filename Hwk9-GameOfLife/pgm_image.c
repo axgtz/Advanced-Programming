@@ -87,6 +87,7 @@ void readPGMFile(const char * filename, pgm_t * pgm_image)
     printf("\nReading file: '%s'\n", filename);
     // Open the file
     file_ptr = fopen(filename, "r");
+
     if (file_ptr == NULL)
     {
         printf("Error: Unable to open file '%s'\n", filename);
@@ -113,7 +114,6 @@ void readPGMFile(const char * filename, pgm_t * pgm_image)
         printf("Invalid file format. Unknown type: %s\n", pgm_image->magic_number);
         exit(EXIT_FAILURE);
     }
-
     // Close the file
     fclose(file_ptr);
     // printf("Done!\n");
