@@ -1,25 +1,27 @@
-# Makefile to compile several simple programs
+# Makefile to compile a complex program composed of many libraries
+# fixed using https://stackoverflow.com/questions/43555410/enable-openmp-support-in-clang-in-mac-os-x-sierra-mojave
 
 ### Variables for this project ###
 # These should be the only ones that need to be modified
 # The files that must be compiled, with a .o extension
-#OBJECTS = shared_variables.o
+#OBJECTS = change_image.o string_functions.o pgm_image.o
 # The header files
-#DEPENDS = 
-# The executable programs to be created
-PROGRAMS = 00-first_omp #05-sum_numbers_omp 06-sum_numbers_omp
+#DEPENDS = string_functions.h pgm_image.h
+# The executable program to be created
+MAIN = 00-first_omp
 
 ### Variables for the compilation rules ###
 # These should work for most projects, but can be modified when necessary
 # The compiler program to use
-CC = gcc
+CC = /usr/local/opt/llvm/bin/clang#gcc
+
+CPPFLAGS = -I/usr/local/opt/llvm/include -fopenmp
+LDFLAGS = -L/usr/local/opt/llvm/lib
 # Options to use when compiling object files
-# NOTE the use of gnu11, because otherwise the socket structures are not included
-#  http://stackoverflow.com/questions/12024703/why-cant-getaddrinfo-be-found-when-compiling-with-gcc-and-std-c99
-CFLAGS = -Wall -g -std=gnu11 -pedantic -fopenmp # -O2
+CFLAGS = -Wall -g -std=c99 -pedantic -fopenmp # -O2
 # Options to use for the final linking process
-# This one links the pthreads library
-LDLIBS = -lm
+# This one links the math library
+LDLIBS = -lm -fopenmp
 
 ### The rules ###
 # These should work for most projects without change
@@ -29,11 +31,11 @@ LDLIBS = -lm
 #   $<  = The first required file of the rule
 
 # Default rule
-all: $(PROGRAMS)
+all: $(MAIN)
 
-# Rule to make the client program
-$(PROGRAM): $(PROGRAM).o $(OBJECTS)
-	$(CC) $^ -o $@ $(LDFLAGS) $(LDLIBS)
+# Rule to make the executable
+$(MAIN): $(OBJECTS)
+	$(CC) $(CPPFLAGS) $^ -o $@ $(LDFLAGS) $(LDLIBS)
 
 # Rule to make the object files
 %.o: %.c $(DEPENDS)
@@ -41,7 +43,7 @@ $(PROGRAM): $(PROGRAM).o $(OBJECTS)
 
 # Clear the compiled files
 clean:
-	rm -rf *.o $(PROGRAMS)
+	rm -rf *.o $(MAIN)
 	
 # Indicate the rules that do not refer to a file
 .PHONY: clean all

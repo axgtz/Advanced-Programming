@@ -53,7 +53,7 @@ void allocateImage(image_t * image)
 // Release the dynamic memory used by an image
 void freeImage(image_t * image)
 {
-    printf("\nReleasing the memory for the pixels\n");
+    // printf("\nReleasing the memory for the pixels\n");
 
     // Free the memory where the data is stored
     free( image->pixels[0] );
