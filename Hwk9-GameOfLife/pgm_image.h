@@ -47,8 +47,8 @@ typedef struct pgm_struct
 
 // Structure of thread
 typedef struct thread_data_struct{
-    pgm_t imageOG; 
-    pgm_t imageNew; 
+    pgm_t * imageOG; 
+    pgm_t * imageNew; 
     int start;
     int end;
 } tdata;

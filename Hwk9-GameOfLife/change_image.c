@@ -13,11 +13,6 @@
 #include <omp.h>
 
 #include <pthread.h>
-#include <stdbool.h>
-#include <time.h>
-
-#include <string.h>
-
 
 #define STRSIZE 50
 
@@ -25,14 +20,12 @@ void printBoard(pgm_t * image);
 void masterLife(pgm_t * image, int iterations, int mode, int numThreads);
 void runSimulation(pgm_t * image, pgm_t * newImage);
 void runSimulationOMP(pgm_t * image, pgm_t * newImage);
-void prepareThreads(pgm_t * image, pgm_t * newImage, int threadNum);
+void prepareThreads(pgm_t * image, pgm_t * newImage, int num_threads);
 void * runSimulationThreads(void * args);
 int countNeighbours(pgm_t * oldImage,int i, int j);
 int mod(int a, int b);
 void usage(char * program);
 
-    // char * in_filename = "Boards/pulsar.pgm";
-    // char * in_filename = "Boards/bichitos.pgm";
 int main(int argc, char ** argv){
     // Check valid arguments at least 3 + 1 , max 4 + 1
     // 1 - iterations, 2 - name of the file to read, 3 - Type of run, 4- number of threads 
@@ -97,9 +90,11 @@ void masterLife(pgm_t * image, int iterations, int mode, int numThreads){
             }
             
             break;
-        case 2: // Threads                        
+        case 2: // Threads       
             for(int i = 0;i < iterations ; i++){         
+
                 prepareThreads(image, &newImage, numThreads);
+                
                 // Prepare name for file
                 sprintf(out_filename, "Result/%s_%d.pgm",iterationName,i);
                 writePGMFile(out_filename, &newImage);
@@ -190,32 +185,69 @@ void runSimulationOMP(pgm_t * image, pgm_t * newImage){
 
 }
 
-void prepareThreads(pgm_t * image, pgm_t * newImage, int threadNum){
-    pthread_t tid;
+void prepareThreads(pgm_t * image, pgm_t * newImage, int num_threads){
     // Check if the number of threads allows to divide the image evenly
-            
-    // Create a new thread with the function as a starting point
+    int imageHeight = image->image.height;
+    int i;
+    if(num_threads < 1 || num_threads > imageHeight){
+        printf("Please enter less threads than the number of rows\n");
+        exit(0);
+    }
 
     // Dynamically allocate memory for threads indices array
+    pthread_t * tid = NULL;
+    tdata * thread_data = NULL;
+
+    thread_data = malloc(num_threads * sizeof(tdata));
+    tid = malloc(num_threads * sizeof(pthread_t));
+    
+    // Create a new thread with the function as a starting point
+    for (i = 0; i<num_threads-1 ; i++){
+
+        thread_data[i].imageOG = image;
+        thread_data[i].imageNew = newImage;
+        //printf("Thread number %d   Start %d   End %d\n", i, ((imageHeight/ num_threads)*i),;
+        thread_data[i].start = ((imageHeight/ num_threads)*i);
+
+        thread_data[i].end = (thread_data[i].start + (imageHeight/ num_threads)-1);
+        pthread_create(&tid[i], NULL, runSimulationThreads, &thread_data[i]);
+        //printf("Created a new thread with id: %ld\n", tid);
+    }
+    //printf("Thread number %d   Start %d   End %d\n", num_threads-1, ((imageHeight/ num_threads)*(num_threads-1)),imageHeight-1);
+
+    // Last thread  
+    thread_data[num_threads-1].imageOG = image;
+    thread_data[num_threads-1].imageNew = newImage;
+    thread_data[num_threads-1].start = ((imageHeight/ num_threads)*(num_threads-1));
+    thread_data[num_threads-1].end = imageHeight-1;
+    
+    pthread_create(&tid[num_threads-1], NULL, runSimulationThreads, &thread_data[num_threads-1]);
 
     // For join threads
+    // Wait for all threads to finish, and get the value they return
+    for (i=0; i<num_threads; i++){
+        pthread_join(tid[i], NULL);
+    }
+
+    // Free the people(data)
+    free(thread_data);
+    free(tid);               
 }
 
 void * runSimulationThreads(void * args){ // (pgm_t * image, pgm_t * newImage, int threadNum)
-    
     tdata * data = (tdata*)args;//get the values for the thread
     
     int numNeighbours = 0;
-    for(int i = 0;i < data->imageOG.image.height;i++){
-        for(int j = 0;j<data->imageOG.image.width;j++){
-            numNeighbours = countNeighbours(&data->imageOG, i, j);
-            switch(data->imageOG.image.pixels[i][j].value){
+    for(int i = data->start;i <= data->end;i++){
+        for(int j = 0;j<data->imageOG->image.width;j++){
+            numNeighbours = countNeighbours(data->imageOG, i, j);
+            switch(data->imageOG->image.pixels[i][j].value){
                 case 0:     // Dead Cell
                     // Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
                     if(numNeighbours == 3){
-                        data->imageNew.image.pixels[i][j].value = 1;
+                        data->imageNew->image.pixels[i][j].value = 1;
                     } else { // Still dead #sorryNotSorry
-                        data->imageNew.image.pixels[i][j].value = 0;
+                        data->imageNew->image.pixels[i][j].value = 0;
                     }
                     break;
                 case 1:     // Happy and Alive Cell
@@ -224,9 +256,9 @@ void * runSimulationThreads(void * args){ // (pgm_t * image, pgm_t * newImage, i
                         Any live cell with more than three live neighbours dies, as if by overpopulation.
                     */
                     if(numNeighbours < 2 || numNeighbours > 3){ // omae wa mou shindeiru
-                        data->imageNew.image.pixels[i][j].value = 0;
+                        data->imageNew->image.pixels[i][j].value = 0;
                     } else { // You get to live once more little one, 2 or 3 neighbours
-                        data->imageNew.image.pixels[i][j].value = 1;
+                        data->imageNew->image.pixels[i][j].value = 1;
                     }
                     break;
                 default:
