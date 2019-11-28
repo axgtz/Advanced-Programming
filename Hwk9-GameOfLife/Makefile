@@ -13,7 +13,7 @@ MAIN = change_image
 ### Variables for the compilation rules ###
 # These should work for most projects, but can be modified when necessary
 # The compiler program to use
-CC = /usr/local/opt/llvm/bin/clang#gcc
+CC = gcc-9 #/usr/local/opt/llvm/bin/clang#gcc
 
 CPPFLAGS = -I/usr/local/opt/llvm/include -fopenmp
 LDFLAGS = -L/usr/local/opt/llvm/lib

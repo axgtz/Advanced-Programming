@@ -45,6 +45,14 @@ typedef struct pgm_struct
     image_t image;
 } pgm_t;
 
+// Structure of thread
+typedef struct thread_data_struct{
+    image_t imageOG; 
+    image_t imageNew; 
+    int start;
+    int end;
+} tdata;
+
 //// FUNCTION PROTOTYPES
 void allocateImage(image_t * image);
 void freeImage(image_t * image);

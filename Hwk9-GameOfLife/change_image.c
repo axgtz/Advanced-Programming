@@ -13,6 +13,11 @@
 #include <omp.h>
 
 #include <pthread.h>
+#include <stdbool.h>
+#include <time.h>
+
+#include <string.h>
+
 
 #define STRSIZE 50
 
@@ -20,11 +25,18 @@ void printBoard(pgm_t * image);
 void masterLife(pgm_t * image, int iterations, int mode);
 void runSimulation(pgm_t * image, pgm_t * newImage);
 void runSimulationOMP(pgm_t * image, pgm_t * newImage);
-void runSimulationThreads(pgm_t * image, pgm_t * newImage, int threadNum); // TODO
+void prepareThreads(pgm_t * image, pgm_t * newImage, int threadNum);
+void * runSimulationThreads(void * args);
 int countNeighbours(pgm_t * oldImage,int i, int j);
 int mod(int a, int b);
+void usage(char * program);
 
-int main(){
+int main(in argc, char ** argv){
+    // Check valid 
+    if(argc >){
+
+    }
+
     //char * in_filename = "Boards/pulsar.pgm";
     char * in_filename = "Boards/bichitos.pgm";
     //char * in_filename = "sample_1.pgm";
@@ -33,7 +45,7 @@ int main(){
 
     readPGMFile(in_filename, &image);
     // mode 
-    masterLife(&image, 500, 0);
+    masterLife(&image, 50, 1);
     return 0;
 }
 
@@ -82,10 +94,9 @@ void masterLife(pgm_t * image, int iterations, int mode){
             }
             
             break;
-        case 2: // Threads
+        case 2: // Threads                        
             for(int i = 0;i < iterations ; i++){         
-                runSimulationThreads(image, &newImage, 4);
-
+                prepareThreads(image, &newImage, 4);
                 // Prepare name for file
                 sprintf(out_filename, "Result/%s_%d.pgm",iterationName,i);
                 writePGMFile(out_filename, &newImage);
@@ -93,6 +104,7 @@ void masterLife(pgm_t * image, int iterations, int mode){
                 // Deep copy from old to new
                 copyPGM(&newImage, image);
             }
+            pthread_exit(NULL);
             break;
         default:
             printf("ERROR WRONG OPTION - TERMINATING\n");
@@ -176,10 +188,22 @@ void runSimulationOMP(pgm_t * image, pgm_t * newImage){
 
 }
 
-void runSimulationThreads(pgm_t * image, pgm_t * newImage, int threadNum){ // TODO
-    // Thread Stuff
-    // pthread_t * tid = NULL;
+void prepareThreads(pgm_t * image, pgm_t * newImage, int threadNum){
+    int numThreads = 4;
+    pthread_t tid;
+    // Check if the number of threads allows to divide the image evenly
+            
+    // Create a new thread with the function as a starting point
 
+    // Dynamically allocate memory for threads indices array
+
+
+}
+
+void * runSimulationThreads(void * args){ // (pgm_t * image, pgm_t * newImage, int threadNum)
+    
+    thread* tdata = (thread*)args;//get the values for the thread
+    
     int numNeighbours = 0;
     for(int i = 0;i < image->image.height;i++){
         for(int j = 0;j<image->image.width;j++){
@@ -211,9 +235,10 @@ void runSimulationThreads(pgm_t * image, pgm_t * newImage, int threadNum){ // TO
             }
         }
     }
+    pthread_exit(NULL);
 }
 
-int countNeighbours(pgm_t * oldImage,int i, int j){ // TODO 
+int countNeighbours(pgm_t * oldImage,int i, int j){  
     int numNeighbours = 0;
     int height = oldImage->image.height;
     int width = oldImage->image.width;
@@ -247,6 +272,16 @@ void printBoard(pgm_t * image){
 int mod(int a, int b){
     int r = a % b;
     return r < 0 ? r + b : r;
+}
+
+void usage(char * program){ // Explain args parameters 
+/*The number of iterations of the simulation to compute
+The name of the file that contains the initial setup of the cells
+In the case of the program using threads, it should receive a third argument specifying the number of threads to create*/
+    printf("Usage:\n");
+    printf("\t%s {number of iterations} {name of file for inicial setup} {type of run you want to make} {number of threads in case want to run multithread mode}\n", program);
+    printf("Types of run: 0: Sequential \t1: Parallel OMP \t2: Parallel Threads\n");
+    exit(EXIT_FAILURE);
 }
 
 /*

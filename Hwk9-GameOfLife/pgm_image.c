@@ -1,13 +1,14 @@
 /*
-   Definition of an image data structure for PGM format images
-   Uses typedef, struct
-   Uses functions to read and write a file in PGM format, described here:
-    http://netpbm.sourceforge.net/doc/pgm.html
-    http://rosettacode.org/wiki/Bitmap/Write_a_PGM_file#C
+        Definition of an image data structure for PGM format images
+        Uses typedef, struct
+        Uses functions to read and write a file in PGM format, described here:
+            http://netpbm.sourceforge.net/doc/pgm.html
+            http://rosettacode.org/wiki/Bitmap/Write_a_PGM_file#C
 
-   Gilberto Echeverria
-   gilecheverria@yahoo.com
-   06/10/2016
+        Gilberto Echeverria
+        gilecheverria@yahoo.com
+        06/10/2016
+    Roberto Alejandro Gutierrez Guillen
 */
 
 #include "pgm_image.h"
