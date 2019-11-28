@@ -22,7 +22,7 @@
 #define STRSIZE 50
 
 void printBoard(pgm_t * image);
-void masterLife(pgm_t * image, int iterations, int mode);
+void masterLife(pgm_t * image, int iterations, int mode, int numThreads);
 void runSimulation(pgm_t * image, pgm_t * newImage);
 void runSimulationOMP(pgm_t * image, pgm_t * newImage);
 void prepareThreads(pgm_t * image, pgm_t * newImage, int threadNum);
@@ -31,25 +31,28 @@ int countNeighbours(pgm_t * oldImage,int i, int j);
 int mod(int a, int b);
 void usage(char * program);
 
-int main(in argc, char ** argv){
-    // Check valid 
-    if(argc >){
-
+    // char * in_filename = "Boards/pulsar.pgm";
+    // char * in_filename = "Boards/bichitos.pgm";
+int main(int argc, char ** argv){
+    // Check valid arguments at least 3 + 1 , max 4 + 1
+    // 1 - iterations, 2 - name of the file to read, 3 - Type of run, 4- number of threads 
+    if(argc < 4 || argc > 6){
+        usage(argv[0]);
     }
-
-    //char * in_filename = "Boards/pulsar.pgm";
-    char * in_filename = "Boards/bichitos.pgm";
-    //char * in_filename = "sample_1.pgm";
-    // char * out_filename = "sample_2.pgm";
+    // Declare new image
     pgm_t image;
 
+    // Get name of file to read
+    char * in_filename = argv[2];
+
+    // Read file
     readPGMFile(in_filename, &image);
     // mode 
-    masterLife(&image, 50, 1);
+    masterLife(&image, atoi(argv[1]), atoi(argv[3]), atoi(argv[4]));
     return 0;
 }
 
-void masterLife(pgm_t * image, int iterations, int mode){
+void masterLife(pgm_t * image, int iterations, int mode, int numThreads){
     pgm_t newImage;
     char * iterationName = "resultImage";
     char out_filename[STRSIZE];
@@ -96,7 +99,7 @@ void masterLife(pgm_t * image, int iterations, int mode){
             break;
         case 2: // Threads                        
             for(int i = 0;i < iterations ; i++){         
-                prepareThreads(image, &newImage, 4);
+                prepareThreads(image, &newImage, numThreads);
                 // Prepare name for file
                 sprintf(out_filename, "Result/%s_%d.pgm",iterationName,i);
                 writePGMFile(out_filename, &newImage);
@@ -104,7 +107,6 @@ void masterLife(pgm_t * image, int iterations, int mode){
                 // Deep copy from old to new
                 copyPGM(&newImage, image);
             }
-            pthread_exit(NULL);
             break;
         default:
             printf("ERROR WRONG OPTION - TERMINATING\n");
@@ -189,7 +191,6 @@ void runSimulationOMP(pgm_t * image, pgm_t * newImage){
 }
 
 void prepareThreads(pgm_t * image, pgm_t * newImage, int threadNum){
-    int numThreads = 4;
     pthread_t tid;
     // Check if the number of threads allows to divide the image evenly
             
@@ -197,24 +198,24 @@ void prepareThreads(pgm_t * image, pgm_t * newImage, int threadNum){
 
     // Dynamically allocate memory for threads indices array
 
-
+    // For join threads
 }
 
 void * runSimulationThreads(void * args){ // (pgm_t * image, pgm_t * newImage, int threadNum)
     
-    thread* tdata = (thread*)args;//get the values for the thread
+    tdata * data = (tdata*)args;//get the values for the thread
     
     int numNeighbours = 0;
-    for(int i = 0;i < image->image.height;i++){
-        for(int j = 0;j<image->image.width;j++){
-            numNeighbours = countNeighbours(image, i, j);
-            switch(image->image.pixels[i][j].value){
+    for(int i = 0;i < data->imageOG.image.height;i++){
+        for(int j = 0;j<data->imageOG.image.width;j++){
+            numNeighbours = countNeighbours(&data->imageOG, i, j);
+            switch(data->imageOG.image.pixels[i][j].value){
                 case 0:     // Dead Cell
                     // Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
                     if(numNeighbours == 3){
-                        newImage->image.pixels[i][j].value = 1;
+                        data->imageNew.image.pixels[i][j].value = 1;
                     } else { // Still dead #sorryNotSorry
-                        newImage->image.pixels[i][j].value = 0;
+                        data->imageNew.image.pixels[i][j].value = 0;
                     }
                     break;
                 case 1:     // Happy and Alive Cell
@@ -223,9 +224,9 @@ void * runSimulationThreads(void * args){ // (pgm_t * image, pgm_t * newImage, i
                         Any live cell with more than three live neighbours dies, as if by overpopulation.
                     */
                     if(numNeighbours < 2 || numNeighbours > 3){ // omae wa mou shindeiru
-                        newImage->image.pixels[i][j].value = 0;
+                        data->imageNew.image.pixels[i][j].value = 0;
                     } else { // You get to live once more little one, 2 or 3 neighbours
-                        newImage->image.pixels[i][j].value = 1;
+                        data->imageNew.image.pixels[i][j].value = 1;
                     }
                     break;
                 default:
